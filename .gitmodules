@@ -1,0 +1,3 @@
+[submodule "external/RodeoEngine"]
+	path = external/RodeoEngine
+	url = https://github.com/realtradam/RodeoEngine.git
