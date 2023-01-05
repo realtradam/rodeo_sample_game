@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_syswm.h"
-#include "bgfx/c99/bgfx.h"
+//#include "SDL2/SDL.h"
+//#include "SDL2/SDL_syswm.h"
+//#include "bgfx/c99/bgfx.h"
 
 #include "rodeo.h"
 
-Rodeo__Data_t _state = {0};
-Rodeo__Data_t* state = &_state;
+Rodeo__data_t _state = {0};
+Rodeo__data_t *state = &_state;
 
 int
 main()
@@ -18,7 +18,7 @@ main()
 	{
 		Rodeo__begin(state);
 
-		bgfx_dbg_text_printf(0, 2, 0x6f, "Description: Initialization and debug text.");
+		Rodeo__draw_debug_text(1, 1, "Debug %s Test", "Text");
 
 		Rodeo__end(state);
 	}
