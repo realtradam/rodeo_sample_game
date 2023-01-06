@@ -1,2 +1,4 @@
 -I./
 -I../external/RodeoEngine/include
+-I../external/RodeoEngine/external/bgfx/include
+-I../external/RodeoEngine/external/bx/include
