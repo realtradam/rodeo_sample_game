@@ -27,6 +27,27 @@ const struct Rodeo__color_rgba_t pink =
 	1.0f
 };
 
+const struct Rodeo__color_rgba_t red_clear =
+{
+	1.0f, 0.0f, 0.0f,
+	0.5f
+};
+const struct Rodeo__color_rgba_t green_clear =
+{
+	0.0f, 1.0f, 0.0f,
+	0.5f
+};
+const struct Rodeo__color_rgba_t blue_clear =
+{
+	0.0f, 0.0f, 1.0f,
+	0.5f
+};
+const struct Rodeo__color_rgba_t pink_clear =
+{
+	1.0f, 0.0f, 1.0f,
+	0.5f
+};
+
 int
 main()
 {
@@ -36,12 +57,56 @@ main()
 	while(!state->quit)
 	{
 		Rodeo__begin(state);
-		Rodeo__draw_rectangle(state, -1, 0, 1, 1, pink);
 
-		Rodeo__draw_rectangle(state, 100, 100, 50, 50, red);
-		Rodeo__draw_rectangle(state, 100, 160, 50, 50, green);
-		Rodeo__draw_rectangle(state, 160, 100, 50, 50, blue);
-		Rodeo__draw_rectangle(state, 160, 160, 50, 50, pink);
+		Rodeo__draw_rectangle(
+			state,
+			100, 100,
+			50, 50,
+			red
+		);
+		Rodeo__draw_rectangle(
+			state,
+			100, 160,
+			50, 50,
+			green
+		);
+		Rodeo__draw_rectangle(
+			state,
+			160, 100,
+			50, 50,
+			blue
+		);
+		Rodeo__draw_rectangle(
+			state,
+			160, 160,
+			50, 50,
+			pink
+		);
+
+		Rodeo__draw_rectangle(
+			state,
+			300, 300,
+			50, 50,
+			red_clear
+		);
+		Rodeo__draw_rectangle(
+			state,
+			310, 310,
+			50, 50,
+			green_clear
+		);
+		Rodeo__draw_rectangle(
+			state,
+			320, 320,
+			50, 50,
+			blue_clear
+		);
+		Rodeo__draw_rectangle(
+			state,
+			330, 330,
+			50, 50,
+			pink_clear
+		);
 
 
 		Rodeo__draw_debug_text(
