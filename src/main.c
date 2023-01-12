@@ -3,46 +3,45 @@
 
 #include "rodeo.h"
 
-Rodeo__data_t _state = {0};
-Rodeo__data_t *state = &_state;
+Rodeo__data_p state;
 
-const struct Rodeo__color_rgba_t red =
+const Rodeo__color_rgba_t red =
 {
 	1.0f, 0.0f, 0.0f,
 	1.0f
 };
-const struct Rodeo__color_rgba_t green =
+const Rodeo__color_rgba_t green =
 {
 	0.0f, 1.0f, 0.0f,
 	1.0f
 };
-const struct Rodeo__color_rgba_t blue =
+const Rodeo__color_rgba_t blue =
 {
 	0.0f, 0.0f, 1.0f,
 	1.0f
 };
-const struct Rodeo__color_rgba_t pink =
+const Rodeo__color_rgba_t pink =
 {
 	1.0f, 0.0f, 1.0f,
 	1.0f
 };
 
-const struct Rodeo__color_rgba_t red_clear =
+const Rodeo__color_rgba_t red_clear =
 {
 	1.0f, 0.0f, 0.0f,
 	0.5f
 };
-const struct Rodeo__color_rgba_t green_clear =
+const Rodeo__color_rgba_t green_clear =
 {
 	0.0f, 1.0f, 0.0f,
 	0.5f
 };
-const struct Rodeo__color_rgba_t blue_clear =
+const Rodeo__color_rgba_t blue_clear =
 {
 	0.0f, 0.0f, 1.0f,
 	0.5f
 };
-const struct Rodeo__color_rgba_t pink_clear =
+const Rodeo__color_rgba_t pink_clear =
 {
 	1.0f, 0.0f, 1.0f,
 	0.5f
@@ -51,10 +50,9 @@ const struct Rodeo__color_rgba_t pink_clear =
 int
 main()
 {
-	Rodeo__init_window(state, 480, 640, "Rodeo Window");
+	Rodeo__init_window(&state, 480, 640, "Rodeo Window");
 
-
-	while(!state->quit)
+	while(!Rodeo__should_quit(state))
 	{
 		Rodeo__begin(state);
 

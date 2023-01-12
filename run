@@ -1,3 +1,4 @@
 #! /bin/sh
 
+#gdb ./build_dir/space_squad
 ./build_dir/space_squad
