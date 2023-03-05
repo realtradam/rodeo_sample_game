@@ -1,45 +1,45 @@
 
 #include "rodeo.h"
 
-Rodeo__data_p state;
+rodeo_data_p state;
 
-const Rodeo__color_rgba_t red =
+const rodeo_rgba_t red =
 {
 	1.0f, 0.0f, 0.0f,
 	1.0f
 };
-const Rodeo__color_rgba_t green =
+const rodeo_rgba_t green =
 {
 	0.0f, 1.0f, 0.0f,
 	1.0f
 };
-const Rodeo__color_rgba_t blue =
+const rodeo_rgba_t blue =
 {
 	0.0f, 0.0f, 1.0f,
 	1.0f
 };
-const Rodeo__color_rgba_t pink =
+const rodeo_rgba_t pink =
 {
 	1.0f, 0.0f, 1.0f,
 	1.0f
 };
 
-const Rodeo__color_rgba_t red_clear =
+const rodeo_rgba_t red_clear =
 {
 	1.0f, 0.0f, 0.0f,
 	0.5f
 };
-const Rodeo__color_rgba_t green_clear =
+const rodeo_rgba_t green_clear =
 {
 	0.0f, 1.0f, 0.0f,
 	0.5f
 };
-const Rodeo__color_rgba_t blue_clear =
+const rodeo_rgba_t blue_clear =
 {
 	0.0f, 0.0f, 1.0f,
 	0.5f
 };
-const Rodeo__color_rgba_t pink_clear =
+const rodeo_rgba_t pink_clear =
 {
 	1.0f, 0.0f, 1.0f,
 	0.5f
@@ -48,83 +48,81 @@ const Rodeo__color_rgba_t pink_clear =
 void
 main_loop(void)
 {
-	Rodeo__begin(state);
-
-	//printf("%s\n", 				Rodeo__get_renderer_name_as_string());
-
-	   Rodeo__draw_rectangle(
+	mrodeo_do(state)
+	{
+	   rodeo_rectangle_draw(
 	   state,
 	   100, 100,
 	   50, 50,
 	   red
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   100, 160,
 	   50, 50,
 	   green
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   160, 100,
 	   50, 50,
 	   blue
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   160, 160,
 	   50, 50,
 	   pink
 	   );
 
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   300, 300,
 	   50, 50,
 	   red_clear
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   310, 310,
 	   50, 50,
 	   green_clear
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   320, 320,
 	   50, 50,
 	   blue_clear
 	   );
-	   Rodeo__draw_rectangle(
+	   rodeo_rectangle_draw(
 	   state,
 	   330, 330,
 	   50, 50,
 	   pink_clear
 	   );
 
-	Rodeo__draw_debug_text(
+	rodeo_debug_text_draw(
 			1,
 			1,
 			" using %s renderer ",
-			Rodeo__get_renderer_name_as_string()
+			rodeo_renderer_name_get()
 			);
-
-	Rodeo__end(state);
+	}
 }
 
 int
 main()
 {
 	printf("Init window...\n");
-	Rodeo__init_window(&state, 480, 640, "Rodeo Window");
-	printf("done creating window\n");
+	mrodeo_window_do(state, 480, 640, "Rodeo Window")
+	{
+		printf("done creating window\n");
 
-	Rodeo__execute_main_loop(
-		state,
-		main_loop
-	);
+		rodeo_mainloop_set(
+				state,
+				main_loop
+				);
 
-	Rodeo__deinit_window(state);
-	Rodeo__quit();
+	}
+	rodeo_deinit();
 	return 0;
 }
