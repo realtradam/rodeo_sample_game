@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdbool.h>
 
 #include "rodeo.h"
 
@@ -47,75 +45,84 @@ const Rodeo__color_rgba_t pink_clear =
 	0.5f
 };
 
+void
+main_loop(void)
+{
+	Rodeo__begin(state);
+
+	//printf("%s\n", 				Rodeo__get_renderer_name_as_string());
+
+	   Rodeo__draw_rectangle(
+	   state,
+	   100, 100,
+	   50, 50,
+	   red
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   100, 160,
+	   50, 50,
+	   green
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   160, 100,
+	   50, 50,
+	   blue
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   160, 160,
+	   50, 50,
+	   pink
+	   );
+
+	   Rodeo__draw_rectangle(
+	   state,
+	   300, 300,
+	   50, 50,
+	   red_clear
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   310, 310,
+	   50, 50,
+	   green_clear
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   320, 320,
+	   50, 50,
+	   blue_clear
+	   );
+	   Rodeo__draw_rectangle(
+	   state,
+	   330, 330,
+	   50, 50,
+	   pink_clear
+	   );
+
+	Rodeo__draw_debug_text(
+			1,
+			1,
+			" using %s renderer ",
+			Rodeo__get_renderer_name_as_string()
+			);
+
+	Rodeo__end(state);
+}
+
 int
 main()
 {
+	printf("Init window...\n");
 	Rodeo__init_window(&state, 480, 640, "Rodeo Window");
+	printf("done creating window\n");
 
-	while(!Rodeo__should_quit(state))
-	{
-		Rodeo__begin(state);
-
-		Rodeo__draw_rectangle(
-			state,
-			100, 100,
-			50, 50,
-			red
-		);
-		Rodeo__draw_rectangle(
-			state,
-			100, 160,
-			50, 50,
-			green
-		);
-		Rodeo__draw_rectangle(
-			state,
-			160, 100,
-			50, 50,
-			blue
-		);
-		Rodeo__draw_rectangle(
-			state,
-			160, 160,
-			50, 50,
-			pink
-		);
-
-		Rodeo__draw_rectangle(
-			state,
-			300, 300,
-			50, 50,
-			red_clear
-		);
-		Rodeo__draw_rectangle(
-			state,
-			310, 310,
-			50, 50,
-			green_clear
-		);
-		Rodeo__draw_rectangle(
-			state,
-			320, 320,
-			50, 50,
-			blue_clear
-		);
-		Rodeo__draw_rectangle(
-			state,
-			330, 330,
-			50, 50,
-			pink_clear
-		);
-
-
-		Rodeo__draw_debug_text(
-				1,
-				1,
-				" using %s renderer ",
-				Rodeo__get_renderer_name_as_string()
-				);
-
-		Rodeo__end(state);
-	}
+	Rodeo__execute_main_loop(
+		state,
+		main_loop
+	);
 
 	Rodeo__deinit_window(state);
 	Rodeo__quit();

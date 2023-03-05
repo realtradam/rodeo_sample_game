@@ -1,0 +1,3 @@
+#! /bin/sh
+
+ruby -run -ehttpd ./build_dir/web -p8000
