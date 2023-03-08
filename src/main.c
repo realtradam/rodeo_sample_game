@@ -1,6 +1,8 @@
 
 #include "rodeo.h"
 
+rodeo_string_t renderer;
+
 const rodeo_rgba_t red =
 {
 	1.0f, 0.0f, 0.0f,
@@ -87,7 +89,7 @@ main_loop(void)
 			1,
 			" using %s renderer ",
 			rodeo_string_to_constcstr(
-				rodeo_renderer_name_get()
+				&renderer
 			)
 		);
 	}
@@ -96,11 +98,21 @@ main_loop(void)
 int
 main()
 {
-	printf("Init window...\n");
+	rodeo_log(
+		rodeo_loglevel_info,
+		"Testing logging... It seems to work!"
+	);
+	rodeo_log(
+		rodeo_loglevel_warning,
+		"Testing warning log level... It seems to work!"
+	);
+	rodeo_log(
+		rodeo_loglevel_error,
+		"Testing error log level... It seems to work!"
+	);
 	mrodeo_window_do(480, 640, "Rodeo Window")
 	{
-		printf("done creating window\n");
-
+		renderer = rodeo_renderer_name_get();
 		rodeo_mainloop_run(
 			main_loop
 		);
