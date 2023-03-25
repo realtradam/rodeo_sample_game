@@ -5,46 +5,62 @@
 rodeo_string_t renderer;
 float time_var;
 
-const rodeo_rgba_t red =
-{
-	1.0f, 0.0f, 0.0f,
-	1.0f
-};
-const rodeo_rgba_t green =
-{
-	0.0f, 1.0f, 0.0f,
-	1.0f
-};
-const rodeo_rgba_t blue =
-{
-	0.0f, 0.0f, 1.0f,
-	1.0f
-};
-const rodeo_rgba_t pink =
-{
-	1.0f, 0.0f, 1.0f,
-	1.0f
+const uint32_t texture_memory[] = {
+	0xff00ffff,
+	0xff00ffff,
+	0xff00ffff,
+	0xff00ffff,
 };
 
-const rodeo_rgba_t red_clear =
-{
-	1.0f, 0.0f, 0.0f,
-	0.5f
+const uint8_t textureData[10 * 10 * 4] = {
+    0, 0, 255, 255, 25, 25, 225, 255, 51, 51, 204, 255, 76, 76, 178, 255, 102, 102, 153, 255,
+    127, 127, 127, 255, 153, 153, 102, 255, 178, 178, 76, 255, 204, 204, 51, 255, 225, 225, 25, 255,
+    255, 255, 0, 255, 255, 230, 0, 255, 255, 204, 0, 255, 255, 178, 0, 255, 255, 153, 0, 255,
+    255, 127, 0, 255, 255, 102, 0, 255, 255, 76, 0, 255, 255, 51, 0, 255, 255, 25, 0, 255,
 };
-const rodeo_rgba_t green_clear =
-{
-	0.0f, 1.0f, 0.0f,
-	0.5f
+
+rodeo_texture_2d_t texture;
+
+const rodeo_RGBAFloat_t red =
+{ 
+	.red = 1.0f, .green = 0.0f, .blue = 0.0f,
+	.alpha = 1.0f
 };
-const rodeo_rgba_t blue_clear =
-{
-	0.0f, 0.0f, 1.0f,
-	0.5f
+const rodeo_RGBAFloat_t green =
+{ 
+	.red = 0.0f, .green = 1.0f, .blue = 0.0f,
+	.alpha = 1.0f
 };
-const rodeo_rgba_t pink_clear =
-{
-	1.0f, 0.0f, 1.0f,
-	0.5f
+const rodeo_RGBAFloat_t blue =
+{ 
+	.red = 0.0f, .green = 0.0f, .blue = 1.0f,
+	.alpha = 1.0f
+};
+const rodeo_RGBAFloat_t pink =
+{ 
+	.red = 1.0f, .green = 0.0f, .blue = 1.0f,
+	.alpha = 1.0f
+};
+
+const rodeo_RGBAFloat_t red_clear =
+{ 
+	.red = 1.0f, .green = 0.0f, .blue = 0.0f,
+	.alpha = 0.5f
+};
+const rodeo_RGBAFloat_t green_clear =
+{ 
+	.red = 0.0f, .green = 1.0f, .blue = 0.0f,
+	.alpha = 0.5f
+};
+const rodeo_RGBAFloat_t blue_clear =
+{ 
+	.red = 0.0f, .green = 0.0f, .blue = 1.0f,
+	.alpha = 0.5f
+};
+const rodeo_RGBAFloat_t pink_clear =
+{ 
+	.red = 1.0f, .green = 0.0f, .blue = 1.0f,
+	.alpha = 0.5f
 };
 
 void
@@ -90,13 +106,18 @@ main_loop(void)
 	   		pink_clear
 	   );
 
-	   rodeo_rectangle_draw(
+	   rodeo_texture_2d_draw(
+			(rodeo_rectangle_t){
+				0, 0,
+				1, 1,
+			},
 			(rodeo_rectangle_t){
 				rodeo_input_mouse_x_get() - 25,
 				rodeo_input_mouse_y_get() - 25,
-				50, 50
+				50, 50,
 			},
-			pink
+			(rodeo_RGBAFloat_t){ .array = {1.0,1.0,1.0,1.0} },
+			&texture
 		);
 
 		rodeo_debug_text_draw(
@@ -143,6 +164,11 @@ main()
 	{
 		renderer = rodeo_renderer_name_get();
 		rodeo_frame_limit_set(60);
+		texture = rodeo_texture_2d_create_from_RGBA8(
+			10,
+			10,
+			textureData
+		);
 		rodeo_mainloop_run(
 			main_loop
 		);
