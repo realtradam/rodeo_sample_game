@@ -20,6 +20,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 -Wextra
 -Wpedantic
 #-Werror
+-Wconversion
 )
 endif()
 
