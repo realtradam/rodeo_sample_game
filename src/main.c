@@ -5,14 +5,19 @@
 rodeo_string_t renderer;
 float time_var;
 
+/*
 const uint8_t texture_memory[] = {
 	0x00, 0xff, 0xff, 0xff,
 	0xff, 0x00, 0xff, 0xff,
 	0xff, 0xff, 0x00, 0xff,
 	0xff, 0xff, 0xff, 0x99,
 };
+*/
 
 rodeo_texture_2d_t texture;
+
+rodeo_vector2_t units[UINT16_MAX][2] = {0};
+uint16_t num_of_units = 0;
 
 const rodeo_color_RGBAFloat_t red =
 { 
@@ -100,6 +105,54 @@ main_loop(void)
 	   );
 
 	   float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
+
+	   for(uint8_t i = 0; i < 10; ++i)
+	   {
+	   		if((num_of_units < UINT16_MAX) && (rodeo_frame_perSecond_get() > 40))
+	   		{
+					num_of_units += 1;
+					units[num_of_units - 1][0] = (rodeo_vector2_t){ {
+						(float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
+						(float)rodeo_input_mouse_y_get() - (orc_size[1] / 2.0f)
+					} };
+					units[num_of_units - 1][1] = (rodeo_vector2_t){ {
+						(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+						(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5)
+					} };
+	   		}
+	   }
+
+	   for(uint64_t i = 0; i < num_of_units; ++i)
+	   {
+		   units[i][0].x += units[i][1].x;
+		   units[i][0].y += units[i][1].y;
+		   if(units[i][0].x > rodeo_screen_width_get() - orc_size[0] || units[i][0].x < 0)
+		   {
+			   units[i][1].x = -units[i][1].x;
+		   }
+		   if(units[i][0].y > rodeo_screen_height_get() - orc_size[1] || units[i][0].y < 0)
+		   {
+			   units[i][1].y = -units[i][1].y;
+		   }
+
+		   rodeo_texture_2d_draw(
+				&(rodeo_rectangle_t){
+					.x = units[i][0].x,
+					.y = units[i][0].y,
+					.width = orc_size[0],
+					.height = orc_size[1],
+				},
+				&(rodeo_rectangle_t){
+					.x = 5,
+					.y = 5,
+					.width = 13,
+					.height = 19
+				},
+				NULL,
+				&texture
+				);
+	   }
+
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
 				.x = (float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
@@ -140,6 +193,13 @@ main_loop(void)
 			" fps: %.2f ",
 			time_var
 		);
+
+		rodeo_debug_text_draw(
+			2,
+			4,
+			" orc count: %"PRIu32" ",
+			num_of_units
+		);
 	}
 }
 
@@ -158,7 +218,7 @@ main(void)
 		rodeo_logLevel_error,
 		"Testing error log level... It seems to work!"
 	);
-	mrodeo_window_do(480, 640, "Rodeo Window")
+	mrodeo_window_do(480, 640, rodeo_string_create("Rodeo Window"))
 	{
 		renderer = rodeo_renderer_name_get();
 		rodeo_frame_limit_set(60);
