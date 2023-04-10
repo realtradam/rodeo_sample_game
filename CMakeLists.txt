@@ -66,8 +66,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 	-s NO_EXIT_RUNTIME=1 \
 	-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 \
 	-s OFFSCREENCANVAS_SUPPORT=1 \
-	-s ALLOW_MEMORY_GROWTH=1\
-	--preload-file shaders")
+	-s ALLOW_MEMORY_GROWTH=1 \
+	--preload-file shaders \
+	--preload-file assets")
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
 	-fno-exceptions \
