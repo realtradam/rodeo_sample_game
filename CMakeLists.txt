@@ -10,9 +10,9 @@ add_executable(${PROJECT_NAME}
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
-add_subdirectory(external/RodeoEngine)
+add_subdirectory(external/RodeoKit)
 add_dependencies(${PROJECT_NAME} RodeoKit)
-target_include_directories(${PROJECT_NAME} PUBLIC external/RodeoEngine/include)
+target_include_directories(${PROJECT_NAME} PUBLIC external/RodeoKit/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC RodeoKit)
 
 if(DEFINED EMSCRIPTEN)
@@ -22,7 +22,7 @@ if(DEFINED EMSCRIPTEN)
 	set_target_properties(${PROJECT_NAME}
 		PROPERTIES
 		LINK_FLAGS
-		"--preload-file ${PROJECT_SOURCE_DIR}/external/RodeoEngine/build_dir/shaders@shaders --preload-file ${PROJECT_SOURCE_DIR}/assets@assets --use-preload-plugins"
+		"--preload-file ${PROJECT_SOURCE_DIR}/external/RodeoKit/build_dir/shaders@shaders --preload-file ${PROJECT_SOURCE_DIR}/assets@assets --use-preload-plugins"
 		)
 endif()
 
@@ -39,7 +39,7 @@ if (NOT DEFINED EMSCRIPTEN)
 	add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 		DEPENDS RodeoKit
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_SOURCE_DIR}/external/RodeoEngine/build_dir/shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
+		${CMAKE_SOURCE_DIR}/external/RodeoKit/build_dir/shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
 		)
 
 	# copy over assets to build directory
