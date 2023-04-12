@@ -1,5 +1,3 @@
-[submodule "external/RodeoEngine"]
+[submodule "external/RodeoKit"]
 	path = external/RodeoKit
-	url = https://github.com/realtradam/RodeoEngine.git
-[submodule "RodeoKit"]
 	url = git@github.com:realtradam/RodeoKit.git
