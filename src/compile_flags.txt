@@ -1,8 +1,8 @@
 -I./
 -I../external/RodeoEngine/include
--I../external/RodeoEngine/src
 -I../external/RodeoEngine/external/bgfx/include
 -I../external/RodeoEngine/external/bx/include
+-I../external/RodeoEngine/external/STC/include
 -Wall
 -Wextra
 -Wpedantic

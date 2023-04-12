@@ -2,7 +2,7 @@
 #include "rodeo.h"
 #include <inttypes.h>
 
-rodeo_string_t renderer;
+cstr renderer;
 float time_var;
 
 /*
@@ -175,7 +175,7 @@ main_loop(void)
 			1,
 			1,
 			" using %s renderer ",
-			rodeo_string_to_constcstr(
+			cstr_str(
 				&renderer
 			)
 		);
@@ -218,7 +218,7 @@ main(void)
 		rodeo_logLevel_error,
 		"Testing error log level... It seems to work!"
 	);
-	mrodeo_window_do(480, 640, rodeo_string_create("Rodeo Window"))
+	mrodeo_window_do(480, 640, cstr_lit("Rodeo Window"))
 	{
 		renderer = rodeo_renderer_name_get();
 		rodeo_frame_limit_set(60);
@@ -229,7 +229,7 @@ main(void)
 		//	texture_memory
 		//);
 
-		texture = rodeo_texture_2d_create_from_path(rodeo_string_create("assets/orc.png"));
+		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 
 		rodeo_mainLoop_run(
 			main_loop
