@@ -1,6 +1,7 @@
 
 #include "rodeo.h"
 #include <inttypes.h>
+#include "rodeo/input.h"
 
 cstr renderer;
 float time_var;
@@ -13,6 +14,10 @@ const uint8_t texture_memory[] = {
 	0xff, 0xff, 0xff, 0x99,
 };
 */
+
+float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
+
+rodeo_input_scene_t scene = {0};
 
 rodeo_texture_2d_t texture;
 
@@ -61,6 +66,29 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.alpha = 0.5f
 };
 
+bool key_down = false;
+
+void
+summon_units(rodeo_input_any_state_t key_state)
+{
+	key_down = key_state.binary_state;
+	for(uint8_t i = 0; i < 10; ++i)
+	{
+		if((num_of_units < UINT16_MAX) && key_down)//(rodeo_frame_perSecond_get() > 40))
+		{
+			num_of_units += 1;
+			units[num_of_units - 1][0] = (rodeo_vector2_t){ {
+				(float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
+					(float)rodeo_input_mouse_y_get() - (orc_size[1] / 2.0f)
+			} };
+			units[num_of_units - 1][1] = (rodeo_vector2_t){ {
+				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+					(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5)
+			} };
+		}
+	}
+}
+
 void
 main_loop(void)
 {
@@ -104,23 +132,7 @@ main_loop(void)
 	   		&pink_clear
 	   );
 
-	   float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 
-	   for(uint8_t i = 0; i < 10; ++i)
-	   {
-	   		if((num_of_units < UINT16_MAX) && (rodeo_frame_perSecond_get() > 40))
-	   		{
-					num_of_units += 1;
-					units[num_of_units - 1][0] = (rodeo_vector2_t){ {
-						(float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
-						(float)rodeo_input_mouse_y_get() - (orc_size[1] / 2.0f)
-					} };
-					units[num_of_units - 1][1] = (rodeo_vector2_t){ {
-						(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
-						(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5)
-					} };
-	   		}
-	   }
 
 	   for(uint64_t i = 0; i < num_of_units; ++i)
 	   {
@@ -206,6 +218,33 @@ main_loop(void)
 int
 main(void)
 {
+
+	rodeo_input_register_type_t register_type_q = {
+		.scancode = rodeo_input_scancode_Q,
+		.binary_type = 	rodeo_input_binary_Scancode,
+		.type = rodeo_input_type_Binary
+	};
+
+	rodeo_input_register_type_t register_type_e = {
+		.scancode = rodeo_input_scancode_E,
+		.binary_type = 	rodeo_input_binary_Scancode,
+		.type = rodeo_input_type_Binary
+	};
+
+	rodeo_input_scene_register_callback(
+		*summon_units,
+		&scene,
+		register_type_q
+	);
+
+	rodeo_input_scene_register_callback(
+		*summon_units,
+		&scene,
+		register_type_e
+	);
+
+	rodeo_input_scene_activate(&scene);
+
 	rodeo_log(
 		rodeo_logLevel_info,
 		"Testing logging... It seems to work!"
