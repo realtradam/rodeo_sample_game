@@ -65,12 +65,25 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.alpha = 0.5f
 };
 
-bool key_down = false;
+bool should_summon_units = false;
+int64_t summon_position[2] = {0};
 
 void
 summon_units_input(rodeo_input_any_state_t key_state)
 {
-	key_down = key_state.data.binary_state;
+	should_summon_units = key_state.data.binary_state;
+}
+
+void
+units_position_x_input(rodeo_input_any_state_t input_state)
+{
+	summon_position[0] = input_state.data.positional_state;
+}
+
+void
+units_position_y_input(rodeo_input_any_state_t input_state)
+{
+	summon_position[1] = input_state.data.positional_state;
 }
 
 void
@@ -78,12 +91,12 @@ summon_units(void)
 {
 	for(uint8_t i = 0; i < 10; ++i)
 	{
-		if((num_of_units < UINT16_MAX) && key_down)//(rodeo_frame_perSecond_get() > 40))
+		if((num_of_units < UINT16_MAX) && should_summon_units)//(rodeo_frame_perSecond_get() > 40))
 		{
 			num_of_units += 1;
 			units[num_of_units - 1][0] = (rodeo_vector2_t){ {
-				(float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
-					(float)rodeo_input_mouse_y_get() - (orc_size[1] / 2.0f)
+				(float)summon_position[0] - (orc_size[0] / 2.0f),
+				(float)summon_position[1] - (orc_size[1] / 2.0f)
 			} };
 			units[num_of_units - 1][1] = (rodeo_vector2_t){ {
 				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
@@ -115,7 +128,7 @@ main_loop(void)
 		time_var = rodeo_frame_perSecond_get();
 	}
 
-	if(key_down)
+	if(should_summon_units) 
 	{
 		summon_units();
 	}
@@ -191,8 +204,8 @@ main_loop(void)
 
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
-				.x = (float)rodeo_input_mouse_x_get() - (orc_size[0] / 2.0f),
-				.y = (float)rodeo_input_mouse_y_get() - (orc_size[1] / 2.0f) ,
+				.x = (float)summon_position[0] - (orc_size[0] / 2.0f),
+				.y = (float)summon_position[1] - (orc_size[1] / 2.0f) ,
 				.width = orc_size[0],
 				.height = orc_size[1],
 			},
@@ -243,10 +256,23 @@ int
 main(void)
 {
 	rodeo_input_scene_t *scene = rodeo_input_scene_create();
-	rodeo_input_command_t *cmd = rodeo_input_command_create(rodeo_input_type_Binary);
-	rodeo_input_command_register_binary_scancode(cmd, rodeo_input_binary_scancode_Q);
-	rodeo_input_command_register_callback(cmd, *summon_units_input);
-	rodeo_input_scene_register_command(scene, cmd);
+
+	rodeo_input_command_t *summon_cmd = rodeo_input_command_create(rodeo_input_type_Binary);
+	rodeo_input_command_t *x_pos_cmd = rodeo_input_command_create(rodeo_input_type_Positional);
+	rodeo_input_command_t *y_pos_cmd = rodeo_input_command_create(rodeo_input_type_Positional);
+
+	rodeo_input_command_register_binary_scancode(summon_cmd, rodeo_input_binary_scancode_Q);
+	rodeo_input_command_register_positional_mouse(x_pos_cmd, rodeo_input_positional_mouse_X);
+	rodeo_input_command_register_positional_mouse(y_pos_cmd, rodeo_input_positional_mouse_Y);
+
+	rodeo_input_command_register_callback(summon_cmd, *summon_units_input);
+	rodeo_input_command_register_callback(x_pos_cmd, *units_position_x_input);
+	rodeo_input_command_register_callback(y_pos_cmd, *units_position_y_input);
+
+	rodeo_input_scene_register_command(scene, summon_cmd);
+	rodeo_input_scene_register_command(scene, x_pos_cmd);
+	rodeo_input_scene_register_command(scene, y_pos_cmd);
+
 	rodeo_input_scene_activate(scene);
 
 	rodeo_log(
@@ -282,8 +308,8 @@ main(void)
 
 	}
 
-	rodeo_input_scene_unregister_command(scene, cmd);
-	rodeo_input_command_destroy(cmd);
+	rodeo_input_scene_unregister_command(scene, summon_cmd);
+	rodeo_input_command_destroy(summon_cmd);
 	rodeo_input_scene_destroy(scene);
 	
 	return 0;
