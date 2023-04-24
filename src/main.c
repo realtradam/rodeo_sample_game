@@ -65,16 +65,10 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.alpha = 0.5f
 };
 
-typedef
-struct
-{
-	bool w;
-	bool a;
-	bool s;
-	bool d;
-}
-key_state_t;
-key_state_t key_state = {0};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 
 typedef
 struct
@@ -84,92 +78,124 @@ struct
 }
 summon_t;
 
-bool should_summon_units = false;
 summon_t summon_position = { .x = 100, .y = 100 };
-summon_t summon_movement = {0};
 
-void
-summon_units_input(rodeo_input_any_state_t key_state)
+void* 
+summon_units_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	should_summon_units = key_state.data.binary_state;
+	static bool should_summon_units = false;
+
+	if(input_state != NULL)
+	{
+		should_summon_units = input_state->data.binary_state;
+	}
+	return &should_summon_units;
 }
 
 void
-units_move_right_input(rodeo_input_any_state_t input_state)
+units_move_generic_input(
+	rodeo_input_any_state_t *input_state,
+	int32_t *move,
+	bool *binary_key,
+	bool should_be_positive,
+	bool reset
+)
 {
-	if(input_state.input_type == rodeo_input_type_Binary)
+	if(reset)
 	{
-		summon_movement.x += (int32_t)input_state.data.binary_state * 15; 
+		*move = 0;
+		*move += (should_be_positive ? 1 : -1) * (int32_t)*binary_key * 5;
 	}
-	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
+	if(input_state != NULL)
 	{
-		if(input_state.data.unbounded_range_state > 0)
+		if(input_state->type == rodeo_input_type_Binary)
 		{
-			summon_movement.x += (int32_t)input_state.data.unbounded_range_state;
+			*binary_key = input_state->data.binary_state;
+			*move += (should_be_positive ? 1 : -1) * (int32_t)*binary_key * 5;
+		}
+		else if(input_state->type == rodeo_input_type_UnboundedRange)
+		{
+			if((input_state->data.unbounded_range_state < 0) && !should_be_positive)
+			{
+				*move += (int32_t)(input_state->data.unbounded_range_state);
+			}
+			else if((input_state->data.unbounded_range_state > 0) && should_be_positive)
+			{
+				*move += (int32_t)(input_state->data.unbounded_range_state);
+			}
 		}
 	}
 }
 
-void
-units_move_left_input(rodeo_input_any_state_t input_state)
+void* 
+units_move_right_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	if(input_state.input_type == rodeo_input_type_Binary)
-	{
-		summon_movement.x -= (int32_t)input_state.data.binary_state * 15; 
-	}
-	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
-	{
-		if(input_state.data.unbounded_range_state < 0)
-		{
-			summon_movement.x += (int32_t)input_state.data.unbounded_range_state;
-		}
-	}
-}
+	static int32_t move = 0;
+	static bool binary_key = false;
 
-void
-units_move_up_input(rodeo_input_any_state_t input_state)
-{
-	if(input_state.input_type == rodeo_input_type_Binary)
+	bool dont_reset = false;
+	if(data == NULL)
 	{
-		summon_movement.y -= (int32_t)input_state.data.binary_state * 15; 
+		data = &dont_reset;
 	}
-	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
-	{
-		if(input_state.data.unbounded_range_state < 0)
-		{
-			summon_movement.y += (int32_t)input_state.data.unbounded_range_state;
-		}
-	}
-}
+	units_move_generic_input(input_state, &move, &binary_key, true, *(bool*)data);
+	return &move;
+} 
 
-void
-units_move_down_input(rodeo_input_any_state_t input_state)
+void* 
+units_move_left_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	if(input_state.input_type == rodeo_input_type_Binary)
-	{
-		summon_movement.y += (int32_t)input_state.data.binary_state * 15; 
-	}
-	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
-	{
-		if(input_state.data.unbounded_range_state > 0)
-		{
-			summon_movement.y += (int32_t)input_state.data.unbounded_range_state;
-		}
-	}
-}
+	static int32_t move = 0;
+	static bool binary_key = false;
 
-void
-units_reset_input(void)
+	bool reset = false;
+	if(data == NULL)
+	{
+		data = &reset;
+	}
+	units_move_generic_input(input_state, &move, &binary_key, false, *(bool*)data);
+	return &move;
+} 
+
+void* 
+units_move_up_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	summon_movement = (summon_t){0};
-}
+	static int32_t move = 0;
+	static bool binary_key = false;
+
+	bool reset = false;
+	if(data == NULL)
+	{
+		data = &reset;
+	}
+	units_move_generic_input(input_state, &move, &binary_key, false, *(bool*)data);
+	return &move;
+} 
+
+void* 
+units_move_down_input(rodeo_input_any_state_t *input_state, void *data)
+{
+	static int32_t move = 0;
+	static bool binary_key = false;
+
+	bool reset = false;
+	if(data == NULL)
+	{
+		data = &reset;
+	}
+	units_move_generic_input(input_state, &move, &binary_key, true, *(bool*)data);
+	return &move;
+} 
+
+#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
 void
 summon_units(void)
 {
 	for(uint8_t i = 0; i < 10; ++i)
 	{
-		if((num_of_units < UINT16_MAX) && should_summon_units)//(rodeo_frame_perSecond_get() > 40))
+		if((num_of_units < UINT16_MAX))//(rodeo_frame_perSecond_get() > 40))
 		{
 			num_of_units += 1;
 			units[num_of_units - 1][0] = (rodeo_vector2_t){ {
@@ -206,12 +232,16 @@ main_loop(void)
 		time_var = rodeo_frame_perSecond_get();
 	}
 
-	units_reset_input();
+	bool reset_movement = true;
+	units_move_up_input(NULL, &reset_movement);
+	units_move_down_input(NULL, &reset_movement);
+	units_move_left_input(NULL, &reset_movement);
+	units_move_right_input(NULL, &reset_movement);
 	mrodeo_frame_do()
 	{
-		summon_position.x += summon_movement.x;
-		summon_position.y += summon_movement.y;
-		if(should_summon_units) 
+		summon_position.x += *(int32_t*)units_move_right_input(NULL, NULL) + *(int32_t*)units_move_left_input(NULL, NULL);
+		summon_position.y += *(int32_t*)units_move_down_input(NULL, NULL) + *(int32_t*)units_move_up_input(NULL, NULL);
+		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
 			summon_units();
 		}

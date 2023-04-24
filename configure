@@ -1,4 +1,4 @@
 #! /bin/sh
 
-cmake -S . -B build_dir/tux
+cmake -S . -B build_dir/tux -DCMAKE_BUILD_TYPE=Debug
 #emcmake cmake -S . -B build_dir/web
