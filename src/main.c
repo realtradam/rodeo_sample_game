@@ -65,8 +65,28 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.alpha = 0.5f
 };
 
+typedef
+struct
+{
+	bool w;
+	bool a;
+	bool s;
+	bool d;
+}
+key_state_t;
+key_state_t key_state = {0};
+
+typedef
+struct
+{
+	int32_t x;
+	int32_t y;
+}
+summon_t;
+
 bool should_summon_units = false;
-int64_t summon_position[2] = {0};
+summon_t summon_position = { .x = 100, .y = 100 };
+summon_t summon_movement = {0};
 
 void
 summon_units_input(rodeo_input_any_state_t key_state)
@@ -75,15 +95,73 @@ summon_units_input(rodeo_input_any_state_t key_state)
 }
 
 void
-units_position_x_input(rodeo_input_any_state_t input_state)
+units_move_right_input(rodeo_input_any_state_t input_state)
 {
-	summon_position[0] = input_state.data.positional_state;
+	if(input_state.input_type == rodeo_input_type_Binary)
+	{
+		summon_movement.x += (int32_t)input_state.data.binary_state * 15; 
+	}
+	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
+	{
+		if(input_state.data.unbounded_range_state > 0)
+		{
+			summon_movement.x += (int32_t)input_state.data.unbounded_range_state;
+		}
+	}
 }
 
 void
-units_position_y_input(rodeo_input_any_state_t input_state)
+units_move_left_input(rodeo_input_any_state_t input_state)
 {
-	summon_position[1] = input_state.data.positional_state;
+	if(input_state.input_type == rodeo_input_type_Binary)
+	{
+		summon_movement.x -= (int32_t)input_state.data.binary_state * 15; 
+	}
+	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
+	{
+		if(input_state.data.unbounded_range_state < 0)
+		{
+			summon_movement.x += (int32_t)input_state.data.unbounded_range_state;
+		}
+	}
+}
+
+void
+units_move_up_input(rodeo_input_any_state_t input_state)
+{
+	if(input_state.input_type == rodeo_input_type_Binary)
+	{
+		summon_movement.y -= (int32_t)input_state.data.binary_state * 15; 
+	}
+	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
+	{
+		if(input_state.data.unbounded_range_state < 0)
+		{
+			summon_movement.y += (int32_t)input_state.data.unbounded_range_state;
+		}
+	}
+}
+
+void
+units_move_down_input(rodeo_input_any_state_t input_state)
+{
+	if(input_state.input_type == rodeo_input_type_Binary)
+	{
+		summon_movement.y += (int32_t)input_state.data.binary_state * 15; 
+	}
+	else if(input_state.input_type == rodeo_input_type_UnboundedRange)
+	{
+		if(input_state.data.unbounded_range_state > 0)
+		{
+			summon_movement.y += (int32_t)input_state.data.unbounded_range_state;
+		}
+	}
+}
+
+void
+units_reset_input(void)
+{
+	summon_movement = (summon_t){0};
 }
 
 void
@@ -95,8 +173,8 @@ summon_units(void)
 		{
 			num_of_units += 1;
 			units[num_of_units - 1][0] = (rodeo_vector2_t){ {
-				(float)summon_position[0] - (orc_size[0] / 2.0f),
-				(float)summon_position[1] - (orc_size[1] / 2.0f)
+				(float)summon_position.x - (orc_size[0] / 2.0f),
+				(float)summon_position.y - (orc_size[1] / 2.0f)
 			} };
 			units[num_of_units - 1][1] = (rodeo_vector2_t){ {
 				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
@@ -128,13 +206,16 @@ main_loop(void)
 		time_var = rodeo_frame_perSecond_get();
 	}
 
-	if(should_summon_units) 
-	{
-		summon_units();
-	}
-
+	units_reset_input();
 	mrodeo_frame_do()
 	{
+		summon_position.x += summon_movement.x;
+		summon_position.y += summon_movement.y;
+		if(should_summon_units) 
+		{
+			summon_units();
+		}
+
 		rodeo_rectangle_draw(
 			&(rodeo_rectangle_t){ 100, 100, 50, 50 },
 			&red
@@ -204,8 +285,8 @@ main_loop(void)
 
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
-				.x = (float)summon_position[0] - (orc_size[0] / 2.0f),
-				.y = (float)summon_position[1] - (orc_size[1] / 2.0f) ,
+				.x = (float)summon_position.x - (orc_size[0] / 2.0f),
+				.y = (float)summon_position.y - (orc_size[1] / 2.0f) ,
 				.width = orc_size[0],
 				.height = orc_size[1],
 			},
@@ -258,20 +339,32 @@ main(void)
 	rodeo_input_scene_t *scene = rodeo_input_scene_create();
 
 	rodeo_input_command_t *summon_cmd = rodeo_input_command_create(rodeo_input_type_Binary);
-	rodeo_input_command_t *x_pos_cmd = rodeo_input_command_create(rodeo_input_type_Positional);
-	rodeo_input_command_t *y_pos_cmd = rodeo_input_command_create(rodeo_input_type_Positional);
+	rodeo_input_command_t *up_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
+	rodeo_input_command_t *down_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
+	rodeo_input_command_t *left_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
+	rodeo_input_command_t *right_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
 
 	rodeo_input_command_register_binary_scancode(summon_cmd, rodeo_input_binary_scancode_Q);
-	rodeo_input_command_register_positional_mouse(x_pos_cmd, rodeo_input_positional_mouse_X);
-	rodeo_input_command_register_positional_mouse(y_pos_cmd, rodeo_input_positional_mouse_Y);
+	rodeo_input_command_register_unboundedRange_mouse(up_mov_cmd, rodeo_input_unboundedRange_mouse_Y);
+	rodeo_input_command_register_binary_scancode(up_mov_cmd, rodeo_input_binary_scancode_W);
+	rodeo_input_command_register_unboundedRange_mouse(down_mov_cmd, rodeo_input_unboundedRange_mouse_Y);
+	rodeo_input_command_register_binary_scancode(down_mov_cmd, rodeo_input_binary_scancode_S);
+	rodeo_input_command_register_unboundedRange_mouse(left_mov_cmd, rodeo_input_unboundedRange_mouse_X);
+	rodeo_input_command_register_binary_scancode(left_mov_cmd, rodeo_input_binary_scancode_A);
+	rodeo_input_command_register_unboundedRange_mouse(right_mov_cmd, rodeo_input_unboundedRange_mouse_X);
+	rodeo_input_command_register_binary_scancode(right_mov_cmd, rodeo_input_binary_scancode_D);
 
 	rodeo_input_command_register_callback(summon_cmd, *summon_units_input);
-	rodeo_input_command_register_callback(x_pos_cmd, *units_position_x_input);
-	rodeo_input_command_register_callback(y_pos_cmd, *units_position_y_input);
+	rodeo_input_command_register_callback(up_mov_cmd, *units_move_up_input);
+	rodeo_input_command_register_callback(down_mov_cmd, *units_move_down_input);
+	rodeo_input_command_register_callback(left_mov_cmd, *units_move_left_input);
+	rodeo_input_command_register_callback(right_mov_cmd, *units_move_right_input);
 
 	rodeo_input_scene_register_command(scene, summon_cmd);
-	rodeo_input_scene_register_command(scene, x_pos_cmd);
-	rodeo_input_scene_register_command(scene, y_pos_cmd);
+	rodeo_input_scene_register_command(scene, up_mov_cmd);
+	rodeo_input_scene_register_command(scene, down_mov_cmd);
+	rodeo_input_scene_register_command(scene, left_mov_cmd);
+	rodeo_input_scene_register_command(scene, right_mov_cmd);
 
 	rodeo_input_scene_activate(scene);
 
