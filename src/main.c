@@ -1,7 +1,6 @@
 
 #include "rodeo.h"
 #include <inttypes.h>
-#include "rodeo/input.h"
 
 cstr renderer;
 float time_var;
@@ -69,9 +68,14 @@ const rodeo_color_RGBAFloat_t pink_clear =
 bool key_down = false;
 
 void
-summon_units(rodeo_input_any_state_t key_state)
+summon_units_input(rodeo_input_any_state_t key_state)
 {
-	key_down = key_state.binary_state;
+	key_down = key_state.data.binary_state;
+}
+
+void
+summon_units(void)
+{
 	for(uint8_t i = 0; i < 10; ++i)
 	{
 		if((num_of_units < UINT16_MAX) && key_down)//(rodeo_frame_perSecond_get() > 40))
@@ -94,8 +98,28 @@ main_loop(void)
 {
 	if(rodeo_frame_count_get() % 10 == 0)
 	{
+		/* for testing
+		rodeo_input_scene_unregister_callback(
+			*summon_units_input,
+			&scene,
+			register_type_e
+		);
+
+		rodeo_input_scene_register_callback(
+			*summon_units_input,
+			&scene,
+			register_type_q
+		);
+		*/
+
 		time_var = rodeo_frame_perSecond_get();
 	}
+
+	if(key_down)
+	{
+		summon_units();
+	}
+
 	mrodeo_frame_do()
 	{
 		rodeo_rectangle_draw(
@@ -218,32 +242,12 @@ main_loop(void)
 int
 main(void)
 {
-
-	rodeo_input_register_type_t register_type_q = {
-		.scancode = rodeo_input_scancode_Q,
-		.binary_type = 	rodeo_input_binary_Scancode,
-		.type = rodeo_input_type_Binary
-	};
-
-	rodeo_input_register_type_t register_type_e = {
-		.scancode = rodeo_input_scancode_E,
-		.binary_type = 	rodeo_input_binary_Scancode,
-		.type = rodeo_input_type_Binary
-	};
-
-	rodeo_input_scene_register_callback(
-		*summon_units,
-		&scene,
-		register_type_q
-	);
-
-	rodeo_input_scene_register_callback(
-		*summon_units,
-		&scene,
-		register_type_e
-	);
-
-	rodeo_input_scene_activate(&scene);
+	rodeo_input_scene_t *scene = rodeo_input_scene_create();
+	rodeo_input_command_t *cmd = rodeo_input_command_create(rodeo_input_type_Binary);
+	rodeo_input_command_register_binary_scancode(cmd, rodeo_input_binary_scancode_Q);
+	rodeo_input_command_register_callback(cmd, *summon_units_input);
+	rodeo_input_scene_register_command(scene, cmd);
+	rodeo_input_scene_activate(scene);
 
 	rodeo_log(
 		rodeo_logLevel_info,
@@ -277,5 +281,10 @@ main(void)
 		rodeo_texture_2d_destroy(&texture);
 
 	}
+
+	rodeo_input_scene_unregister_command(scene, cmd);
+	rodeo_input_command_destroy(cmd);
+	rodeo_input_scene_destroy(scene);
+	
 	return 0;
 }

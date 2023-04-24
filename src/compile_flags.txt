@@ -1,9 +1,10 @@
 -I./
--I../external/RodeoEngine/include
--I../external/RodeoEngine/external/bgfx/include
--I../external/RodeoEngine/external/bx/include
--I../external/RodeoEngine/external/STC/include
+-I../external/RodeoKit/include
+-I../external/RodeoKit/external/bgfx/include
+-I../external/RodeoKit/external/bx/include
+-I../external/RodeoKit/external/STC/include
 -Wall
 -Wextra
 -Wpedantic
 -Wconversion
+-std=c99
