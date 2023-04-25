@@ -6,13 +6,17 @@ project(demo
 
 add_executable(${PROJECT_NAME}
 	"src/main.c"
+	"src/input.c"
 	)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
 add_subdirectory(external/RodeoKit)
 add_dependencies(${PROJECT_NAME} RodeoKit)
-target_include_directories(${PROJECT_NAME} PUBLIC external/RodeoKit/include)
+target_include_directories(${PROJECT_NAME} PUBLIC
+	external/RodeoKit/include
+	src
+	)
 target_link_libraries(${PROJECT_NAME} PUBLIC RodeoKit)
 
 if(DEFINED EMSCRIPTEN)

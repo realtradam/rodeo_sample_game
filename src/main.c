@@ -1,22 +1,22 @@
 
 #include "rodeo.h"
 #include <inttypes.h>
+#include "input.h"
 
 cstr renderer;
 float time_var;
 
-/*
-const uint8_t texture_memory[] = {
-	0x00, 0xff, 0xff, 0xff,
-	0xff, 0x00, 0xff, 0xff,
-	0xff, 0xff, 0x00, 0xff,
-	0xff, 0xff, 0xff, 0x99,
-};
-*/
+typedef
+struct
+{
+	float x;
+	float y;
+}
+summon_t;
+
+summon_t summon_position = { .x = 100, .y = 100 };
 
 float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
-
-rodeo_input_scene_t scene = {0};
 
 rodeo_texture_2d_t texture;
 
@@ -64,192 +64,6 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.red = 1.0f, .green = 0.0f, .blue = 1.0f,
 	.alpha = 0.5f
 };
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-
-typedef
-struct
-{
-	float x;
-	float y;
-}
-summon_t;
-
-summon_t summon_position = { .x = 100, .y = 100 };
-
-void* 
-summon_units_input(rodeo_input_any_state_t *input_state, void *data)
-{
-	static bool should_summon_units = false;
-
-	if(input_state != NULL)
-	{
-		should_summon_units = input_state->data.binary_state;
-	}
-	return &should_summon_units;
-}
-
-void
-units_move_generic_input(
-	rodeo_input_any_state_t *input_state,
-	float *move,
-	bool *binary_key,
-	float *unbounded_range,
-	float *bounded_range,
-	bool should_be_positive,
-	bool reset
-)
-{
-	if(reset)
-	{
-		*move = 0.0f;
-		*move += (should_be_positive ? 1 : -1) * (float)*binary_key * 5.0f;
-		*move += (*unbounded_range);
-		*unbounded_range = 0.0f;
-		*move += ((*bounded_range) * 15.0f);
-		//*bounded_range = 0.0f;
-
-	}
-	if(input_state != NULL)
-	{
-		if(input_state->type == rodeo_input_type_Binary)
-		{
-			*binary_key = input_state->data.binary_state;
-		}
-		else if(input_state->type == rodeo_input_type_UnboundedRange)
-		{
-			if((input_state->data.unbounded_range_state < 0) && !should_be_positive)
-			{
-				*unbounded_range += input_state->data.unbounded_range_state;
-			}
-			else if((input_state->data.unbounded_range_state > 0) && should_be_positive)
-			{
-				*unbounded_range += input_state->data.unbounded_range_state;
-			}
-		}
-		else if(input_state->type == rodeo_input_type_BoundedRange)
-		{
-			if((input_state->data.bounded_range_state < -0.03) && !should_be_positive)
-			{
-				*bounded_range = input_state->data.bounded_range_state;
-			}
-			else if((input_state->data.bounded_range_state > 0.03) && should_be_positive)
-			{
-				*bounded_range = input_state->data.bounded_range_state;
-			}
-			else
-			{
-				*bounded_range = 0;
-			}
-		}
-	}
-}
-
-void* 
-units_move_right_input(rodeo_input_any_state_t *input_state, void *data)
-{
-	static float move = 0;
-	static bool binary_key = false;
-	static float unbounded_range = 0.0f;
-	static float bounded_range = 0.0f;
-
-	bool dont_reset = false;
-	if(data == NULL)
-	{
-		data = &dont_reset;
-	}
-	units_move_generic_input(
-		input_state,
-		&move,
-		&binary_key,
-		&unbounded_range,
-		&bounded_range,
-		true,
-		*(bool*)data
-	);
-	return &move;
-} 
-
-void* 
-units_move_left_input(rodeo_input_any_state_t *input_state, void *data)
-{
-	static float move = 0;
-	static bool binary_key = false;
-	static float unbounded_range = 0.0f;
-	static float bounded_range = 0.0f;
-
-	bool reset = false;
-	if(data == NULL)
-	{
-		data = &reset;
-	}
-	units_move_generic_input(
-		input_state,
-		&move,
-		&binary_key,
-		&unbounded_range,
-		&bounded_range,
-		false,
-		*(bool*)data
-	);
-	return &move;
-} 
-
-void* 
-units_move_up_input(rodeo_input_any_state_t *input_state, void *data)
-{
-	static float move = 0;
-	static bool binary_key = false;
-	static float unbounded_range = 0.0f;
-	static float bounded_range = 0.0f;
-
-	bool reset = false;
-	if(data == NULL)
-	{
-		data = &reset;
-	}
-	units_move_generic_input(
-		input_state,
-		&move,
-		&binary_key,
-		&unbounded_range,
-		&bounded_range,
-		false,
-		*(bool*)data
-	);
-	return &move;
-} 
-
-void* 
-units_move_down_input(rodeo_input_any_state_t *input_state, void *data)
-{
-	static float move = 0;
-	static bool binary_key = false;
-	static float unbounded_range = 0.0f;
-	static float bounded_range = 0.0f;
-
-	bool reset = false;
-	if(data == NULL)
-	{
-		data = &reset;
-	}
-	units_move_generic_input(
-		input_state,
-		&move,
-		&binary_key,
-		&unbounded_range,
-		&bounded_range,
-		true,
-		*(bool*)data
-	);
-	return &move;
-} 
-
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
 
 void
 summon_units(void)
@@ -428,51 +242,8 @@ main_loop(void)
 int
 main(void)
 {
-	rodeo_input_scene_t *scene = rodeo_input_scene_create();
-
-	rodeo_input_command_t *summon_cmd = rodeo_input_command_create(rodeo_input_type_Binary);
-
-	rodeo_input_command_t *up_mov_cmd = rodeo_input_command_create(
-		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
-	);
-	rodeo_input_command_t *down_mov_cmd = rodeo_input_command_create(
-		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
-	);
-	rodeo_input_command_t *left_mov_cmd = rodeo_input_command_create(
-		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
-	);
-	rodeo_input_command_t *right_mov_cmd = rodeo_input_command_create(
-		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
-	);
-
-	rodeo_input_command_register_binary_scancode(summon_cmd, rodeo_input_binary_scancode_Q);
-	rodeo_input_command_register_unboundedRange_mouse(up_mov_cmd, rodeo_input_unboundedRange_mouse_Y);
-	rodeo_input_command_register_binary_scancode(up_mov_cmd, rodeo_input_binary_scancode_W);
-	rodeo_input_command_register_unboundedRange_mouse(down_mov_cmd, rodeo_input_unboundedRange_mouse_Y);
-	rodeo_input_command_register_binary_scancode(down_mov_cmd, rodeo_input_binary_scancode_S);
-	rodeo_input_command_register_unboundedRange_mouse(left_mov_cmd, rodeo_input_unboundedRange_mouse_X);
-	rodeo_input_command_register_binary_scancode(left_mov_cmd, rodeo_input_binary_scancode_A);
-	rodeo_input_command_register_unboundedRange_mouse(right_mov_cmd, rodeo_input_unboundedRange_mouse_X);
-	rodeo_input_command_register_binary_scancode(right_mov_cmd, rodeo_input_binary_scancode_D);
-	rodeo_input_command_register_boundedRange_controllerAxis(up_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_Y);
-	rodeo_input_command_register_boundedRange_controllerAxis(down_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_Y);
-	rodeo_input_command_register_boundedRange_controllerAxis(left_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_X);
-	rodeo_input_command_register_boundedRange_controllerAxis(right_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_X);
-
-	rodeo_input_command_register_callback(summon_cmd, *summon_units_input);
-	rodeo_input_command_register_callback(up_mov_cmd, *units_move_up_input);
-	rodeo_input_command_register_callback(down_mov_cmd, *units_move_down_input);
-	rodeo_input_command_register_callback(left_mov_cmd, *units_move_left_input);
-	rodeo_input_command_register_callback(right_mov_cmd, *units_move_right_input);
-
-	rodeo_input_scene_register_command(scene, summon_cmd);
-	rodeo_input_scene_register_command(scene, up_mov_cmd);
-	rodeo_input_scene_register_command(scene, down_mov_cmd);
-	rodeo_input_scene_register_command(scene, left_mov_cmd);
-	rodeo_input_scene_register_command(scene, right_mov_cmd);
-
-	rodeo_input_scene_activate(scene);
-
+	register_inputs();
+	
 	rodeo_log(
 		rodeo_logLevel_info,
 		"Testing logging... It seems to work!"
@@ -506,9 +277,7 @@ main(void)
 
 	}
 
-	rodeo_input_scene_unregister_command(scene, summon_cmd);
-	rodeo_input_command_destroy(summon_cmd);
-	rodeo_input_scene_destroy(scene);
-	
+	unregister_inputs();
+
 	return 0;
 }
