@@ -73,8 +73,8 @@ const rodeo_color_RGBAFloat_t pink_clear =
 typedef
 struct
 {
-	int32_t x;
-	int32_t y;
+	float x;
+	float y;
 }
 summon_t;
 
@@ -95,33 +95,54 @@ summon_units_input(rodeo_input_any_state_t *input_state, void *data)
 void
 units_move_generic_input(
 	rodeo_input_any_state_t *input_state,
-	int32_t *move,
+	float *move,
 	bool *binary_key,
+	float *unbounded_range,
+	float *bounded_range,
 	bool should_be_positive,
 	bool reset
 )
 {
 	if(reset)
 	{
-		*move = 0;
-		*move += (should_be_positive ? 1 : -1) * (int32_t)*binary_key * 5;
+		*move = 0.0f;
+		*move += (should_be_positive ? 1 : -1) * (float)*binary_key * 5.0f;
+		*move += (*unbounded_range);
+		*unbounded_range = 0.0f;
+		*move += ((*bounded_range) * 15.0f);
+		//*bounded_range = 0.0f;
+
 	}
 	if(input_state != NULL)
 	{
 		if(input_state->type == rodeo_input_type_Binary)
 		{
 			*binary_key = input_state->data.binary_state;
-			*move += (should_be_positive ? 1 : -1) * (int32_t)*binary_key * 5;
 		}
 		else if(input_state->type == rodeo_input_type_UnboundedRange)
 		{
 			if((input_state->data.unbounded_range_state < 0) && !should_be_positive)
 			{
-				*move += (int32_t)(input_state->data.unbounded_range_state);
+				*unbounded_range += input_state->data.unbounded_range_state;
 			}
 			else if((input_state->data.unbounded_range_state > 0) && should_be_positive)
 			{
-				*move += (int32_t)(input_state->data.unbounded_range_state);
+				*unbounded_range += input_state->data.unbounded_range_state;
+			}
+		}
+		else if(input_state->type == rodeo_input_type_BoundedRange)
+		{
+			if((input_state->data.bounded_range_state < -0.03) && !should_be_positive)
+			{
+				*bounded_range = input_state->data.bounded_range_state;
+			}
+			else if((input_state->data.bounded_range_state > 0.03) && should_be_positive)
+			{
+				*bounded_range = input_state->data.bounded_range_state;
+			}
+			else
+			{
+				*bounded_range = 0;
 			}
 		}
 	}
@@ -130,60 +151,100 @@ units_move_generic_input(
 void* 
 units_move_right_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	static int32_t move = 0;
+	static float move = 0;
 	static bool binary_key = false;
+	static float unbounded_range = 0.0f;
+	static float bounded_range = 0.0f;
 
 	bool dont_reset = false;
 	if(data == NULL)
 	{
 		data = &dont_reset;
 	}
-	units_move_generic_input(input_state, &move, &binary_key, true, *(bool*)data);
+	units_move_generic_input(
+		input_state,
+		&move,
+		&binary_key,
+		&unbounded_range,
+		&bounded_range,
+		true,
+		*(bool*)data
+	);
 	return &move;
 } 
 
 void* 
 units_move_left_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	static int32_t move = 0;
+	static float move = 0;
 	static bool binary_key = false;
+	static float unbounded_range = 0.0f;
+	static float bounded_range = 0.0f;
 
 	bool reset = false;
 	if(data == NULL)
 	{
 		data = &reset;
 	}
-	units_move_generic_input(input_state, &move, &binary_key, false, *(bool*)data);
+	units_move_generic_input(
+		input_state,
+		&move,
+		&binary_key,
+		&unbounded_range,
+		&bounded_range,
+		false,
+		*(bool*)data
+	);
 	return &move;
 } 
 
 void* 
 units_move_up_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	static int32_t move = 0;
+	static float move = 0;
 	static bool binary_key = false;
+	static float unbounded_range = 0.0f;
+	static float bounded_range = 0.0f;
 
 	bool reset = false;
 	if(data == NULL)
 	{
 		data = &reset;
 	}
-	units_move_generic_input(input_state, &move, &binary_key, false, *(bool*)data);
+	units_move_generic_input(
+		input_state,
+		&move,
+		&binary_key,
+		&unbounded_range,
+		&bounded_range,
+		false,
+		*(bool*)data
+	);
 	return &move;
 } 
 
 void* 
 units_move_down_input(rodeo_input_any_state_t *input_state, void *data)
 {
-	static int32_t move = 0;
+	static float move = 0;
 	static bool binary_key = false;
+	static float unbounded_range = 0.0f;
+	static float bounded_range = 0.0f;
 
 	bool reset = false;
 	if(data == NULL)
 	{
 		data = &reset;
 	}
-	units_move_generic_input(input_state, &move, &binary_key, true, *(bool*)data);
+	units_move_generic_input(
+		input_state,
+		&move,
+		&binary_key,
+		&unbounded_range,
+		&bounded_range,
+		true,
+		*(bool*)data
+	);
 	return &move;
 } 
 
@@ -232,15 +293,16 @@ main_loop(void)
 		time_var = rodeo_frame_perSecond_get();
 	}
 
-	bool reset_movement = true;
-	units_move_up_input(NULL, &reset_movement);
-	units_move_down_input(NULL, &reset_movement);
-	units_move_left_input(NULL, &reset_movement);
-	units_move_right_input(NULL, &reset_movement);
 	mrodeo_frame_do()
 	{
-		summon_position.x += *(int32_t*)units_move_right_input(NULL, NULL) + *(int32_t*)units_move_left_input(NULL, NULL);
-		summon_position.y += *(int32_t*)units_move_down_input(NULL, NULL) + *(int32_t*)units_move_up_input(NULL, NULL);
+		bool reset_movement = true;
+		units_move_up_input(NULL, &reset_movement);
+		units_move_down_input(NULL, &reset_movement);
+		units_move_left_input(NULL, &reset_movement);
+		units_move_right_input(NULL, &reset_movement);
+		summon_position.x += *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
+		summon_position.y += *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+
 		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
 			summon_units();
@@ -315,8 +377,8 @@ main_loop(void)
 
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
-				.x = (float)summon_position.x - (orc_size[0] / 2.0f),
-				.y = (float)summon_position.y - (orc_size[1] / 2.0f) ,
+				.x = (float)(int32_t)summon_position.x - (orc_size[0] / 2.0f),
+				.y = (float)(int32_t)summon_position.y - (orc_size[1] / 2.0f) ,
 				.width = orc_size[0],
 				.height = orc_size[1],
 			},
@@ -369,10 +431,19 @@ main(void)
 	rodeo_input_scene_t *scene = rodeo_input_scene_create();
 
 	rodeo_input_command_t *summon_cmd = rodeo_input_command_create(rodeo_input_type_Binary);
-	rodeo_input_command_t *up_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
-	rodeo_input_command_t *down_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
-	rodeo_input_command_t *left_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
-	rodeo_input_command_t *right_mov_cmd = rodeo_input_command_create(rodeo_input_type_Binary | rodeo_input_type_UnboundedRange);
+
+	rodeo_input_command_t *up_mov_cmd = rodeo_input_command_create(
+		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
+	);
+	rodeo_input_command_t *down_mov_cmd = rodeo_input_command_create(
+		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
+	);
+	rodeo_input_command_t *left_mov_cmd = rodeo_input_command_create(
+		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
+	);
+	rodeo_input_command_t *right_mov_cmd = rodeo_input_command_create(
+		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
+	);
 
 	rodeo_input_command_register_binary_scancode(summon_cmd, rodeo_input_binary_scancode_Q);
 	rodeo_input_command_register_unboundedRange_mouse(up_mov_cmd, rodeo_input_unboundedRange_mouse_Y);
@@ -383,6 +454,10 @@ main(void)
 	rodeo_input_command_register_binary_scancode(left_mov_cmd, rodeo_input_binary_scancode_A);
 	rodeo_input_command_register_unboundedRange_mouse(right_mov_cmd, rodeo_input_unboundedRange_mouse_X);
 	rodeo_input_command_register_binary_scancode(right_mov_cmd, rodeo_input_binary_scancode_D);
+	rodeo_input_command_register_boundedRange_controllerAxis(up_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_Y);
+	rodeo_input_command_register_boundedRange_controllerAxis(down_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_Y);
+	rodeo_input_command_register_boundedRange_controllerAxis(left_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_X);
+	rodeo_input_command_register_boundedRange_controllerAxis(right_mov_cmd, rodeo_input_boundedRange_controllerAxisLeft_X);
 
 	rodeo_input_command_register_callback(summon_cmd, *summon_units_input);
 	rodeo_input_command_register_callback(up_mov_cmd, *units_move_up_input);
