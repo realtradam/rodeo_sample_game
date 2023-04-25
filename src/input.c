@@ -43,8 +43,6 @@ units_move_generic_input(
 		*move += (*unbounded_range);
 		*unbounded_range = 0.0f;
 		*move += ((*bounded_range) * 15.0f);
-		//*bounded_range = 0.0f;
-
 	}
 	if(input_state != NULL)
 	{
@@ -212,8 +210,9 @@ register_inputs(void)
 	// --
 
 	// - register inputs -
-	rodeo_input_command_register_binary_scancode(inputs.create, rodeo_input_binary_scancode_Q);
+	rodeo_input_command_register_binary_scancode(inputs.create, rodeo_input_binary_scancode_SPACE);
 	rodeo_input_command_register_binary_controllerButton(inputs.create, rodeo_input_binary_controllerButton_A);
+	rodeo_input_command_register_binary_mouseButton(inputs.create, rodeo_input_binary_mouseButton_LEFT);
 
 	rodeo_input_command_register_binary_scancode(inputs.up, rodeo_input_binary_scancode_W);
 	rodeo_input_command_register_binary_scancode(inputs.down, rodeo_input_binary_scancode_S);
