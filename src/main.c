@@ -25,44 +25,44 @@ uint16_t num_of_units = 0;
 
 const rodeo_color_RGBAFloat_t red =
 { 
-	.red = 1.0f, .green = 0.0f, .blue = 0.0f,
-	.alpha = 1.0f
+	.colors.red = 1.0f, .colors.green = 0.0f, .colors.blue = 0.0f,
+	.colors.alpha = 1.0f
 };
 const rodeo_color_RGBAFloat_t green =
 { 
-	.red = 0.0f, .green = 1.0f, .blue = 0.0f,
-	.alpha = 1.0f
+	.colors.red = 0.0f, .colors.green = 1.0f, .colors.blue = 0.0f,
+	.colors.alpha = 1.0f
 };
 const rodeo_color_RGBAFloat_t blue =
 { 
-	.red = 0.0f, .green = 0.0f, .blue = 1.0f,
-	.alpha = 1.0f
+	.colors.red = 0.0f, .colors.green = 0.0f, .colors.blue = 1.0f,
+	.colors.alpha = 1.0f
 };
 const rodeo_color_RGBAFloat_t pink =
 { 
-	.red = 1.0f, .green = 0.0f, .blue = 1.0f,
-	.alpha = 1.0f
+	.colors.red = 1.0f, .colors.green = 0.0f, .colors.blue = 1.0f,
+	.colors.alpha = 1.0f
 };
 
 const rodeo_color_RGBAFloat_t red_clear =
 { 
-	.red = 1.0f, .green = 0.0f, .blue = 0.0f,
-	.alpha = 0.5f
+	.colors.red = 1.0f, .colors.green = 0.0f, .colors.blue = 0.0f,
+	.colors.alpha = 0.5f
 };
 const rodeo_color_RGBAFloat_t green_clear =
 { 
-	.red = 0.0f, .green = 1.0f, .blue = 0.0f,
-	.alpha = 0.5f
+	.colors.red = 0.0f, .colors.green = 1.0f, .colors.blue = 0.0f,
+	.colors.alpha = 0.5f
 };
 const rodeo_color_RGBAFloat_t blue_clear =
 { 
-	.red = 0.0f, .green = 0.0f, .blue = 1.0f,
-	.alpha = 0.5f
+	.colors.red = 0.0f, .colors.green = 0.0f, .colors.blue = 1.0f,
+	.colors.alpha = 0.5f
 };
 const rodeo_color_RGBAFloat_t pink_clear =
 { 
-	.red = 1.0f, .green = 0.0f, .blue = 1.0f,
-	.alpha = 0.5f
+	.colors.red = 1.0f, .colors.green = 0.0f, .colors.blue = 1.0f,
+	.colors.alpha = 0.5f
 };
 
 void
@@ -160,21 +160,21 @@ main_loop(void)
 
 	   for(uint64_t i = 0; i < num_of_units; ++i)
 	   {
-		   units[i][0].x += units[i][1].x;
-		   units[i][0].y += units[i][1].y;
-		   if(units[i][0].x > rodeo_screen_width_get() - orc_size[0] || units[i][0].x < 0)
+		   units[i][0].position.x += units[i][1].position.x;
+		   units[i][0].position.y += units[i][1].position.y;
+		   if(units[i][0].position.x > rodeo_screen_width_get() - orc_size[0] || units[i][0].position.x < 0)
 		   {
-			   units[i][1].x = -units[i][1].x;
+			   units[i][1].position.x = -units[i][1].position.x;
 		   }
-		   if(units[i][0].y > rodeo_screen_height_get() - orc_size[1] || units[i][0].y < 0)
+		   if(units[i][0].position.y > rodeo_screen_height_get() - orc_size[1] || units[i][0].position.y < 0)
 		   {
-			   units[i][1].y = -units[i][1].y;
+			   units[i][1].position.y = -units[i][1].position.y;
 		   }
 
 		   rodeo_texture_2d_draw(
 				&(rodeo_rectangle_t){
-					.x = units[i][0].x,
-					.y = units[i][0].y,
+					.x = units[i][0].position.x,
+					.y = units[i][0].position.y,
 					.width = orc_size[0],
 					.height = orc_size[1],
 				},
