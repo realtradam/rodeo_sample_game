@@ -1,6 +1,7 @@
 
 #include "input.h"
 #include "rodeo/input.h"
+#include "rodeo/audio.h"
 
 scenes_and_commands_t inputs = {0};
 
@@ -177,7 +178,26 @@ units_move_down_input(rodeo_input_any_state_t *input_state, void *data)
 		*(bool*)data
 	);
 	return &move;
-} 
+}
+
+void*
+play_sound_input(rodeo_input_any_state_t *input_state, void *data)
+{
+	static bool down = false;
+
+	if(NULL != input_state)
+	{
+		down = input_state->data.binary_state;
+	}
+	/*
+	else if(down)
+	{
+		rodeo_audio_playSample();
+	}
+	*/
+
+	return &down;
+}
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -207,6 +227,10 @@ register_inputs(void)
 	inputs.right = rodeo_input_command_create(
 		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
 	);
+
+	inputs.play_sound = rodeo_input_command_create(
+		rodeo_input_type_Binary
+	);
 	// --
 
 	// - register inputs -
@@ -226,6 +250,8 @@ register_inputs(void)
 	rodeo_input_command_register_boundedRange_controllerAxis(inputs.down, rodeo_input_boundedRange_controllerAxisLeft_Y);
 	rodeo_input_command_register_boundedRange_controllerAxis(inputs.left, rodeo_input_boundedRange_controllerAxisLeft_X);
 	rodeo_input_command_register_boundedRange_controllerAxis(inputs.right, rodeo_input_boundedRange_controllerAxisLeft_X);
+
+	rodeo_input_command_register_binary_scancode(inputs.play_sound, rodeo_input_binary_scancode_M);
 	// --
 
 	// - register callbacks -
@@ -234,6 +260,8 @@ register_inputs(void)
 	rodeo_input_command_register_callback(inputs.down, *units_move_down_input);
 	rodeo_input_command_register_callback(inputs.left, *units_move_left_input);
 	rodeo_input_command_register_callback(inputs.right, *units_move_right_input);
+
+	rodeo_input_command_register_callback(inputs.play_sound, *play_sound_input);
 	// --
 
 	// - register commands -
@@ -242,6 +270,8 @@ register_inputs(void)
 	rodeo_input_scene_register_command(inputs.scene, inputs.down);
 	rodeo_input_scene_register_command(inputs.scene, inputs.left);
 	rodeo_input_scene_register_command(inputs.scene, inputs.right);
+
+	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound);
 	// --
 
 	// activate scene

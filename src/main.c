@@ -117,6 +117,13 @@ main_loop(void)
 		summon_position.x += *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
 		summon_position.y += *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
 
+		if(*(bool*)play_sound_input(NULL, NULL))
+		{
+			rodeo_audio_playSample();
+		}
+		
+		//play_sound_input(NULL, NULL);
+
 		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
 			summon_units();
@@ -268,6 +275,7 @@ main(void)
 		//);
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+		rodeo_audio_loadSample();
 
 		rodeo_mainLoop_run(
 			main_loop
