@@ -1,4 +1,3 @@
 #! /bin/sh
 
-cmake -S . -B build_dir/tux -DCMAKE_BUILD_TYPE=Debug
-#emcmake cmake -S . -B build_dir/web
+CXX=clang++ CC=clang cmake -S . -B build_dir/tux -DCMAKE_BUILD_TYPE=Debug -DSDL_VIDEO_DRIVER_X11=ON
