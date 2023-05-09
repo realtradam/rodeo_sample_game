@@ -6,6 +6,8 @@
 cstr renderer;
 float time_var;
 
+rodeo_audio_sound_t *scratch = NULL;
+
 typedef
 struct
 {
@@ -119,7 +121,7 @@ main_loop(void)
 
 		if(*(bool*)play_sound_input(NULL, NULL))
 		{
-			rodeo_audio_playSample();
+			rodeo_audio_sound_play(scratch, -1);
 		}
 		
 		//play_sound_input(NULL, NULL);
@@ -275,7 +277,7 @@ main(void)
 		//);
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
-		rodeo_audio_loadSample();
+		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
 
 		rodeo_mainLoop_run(
 			main_loop
