@@ -199,6 +199,44 @@ play_sound_input(rodeo_input_any_state_t *input_state, void *data)
 	return &down;
 }
 
+void*
+play_sound_input2(rodeo_input_any_state_t *input_state, void *data)
+{
+	static bool down = false;
+
+	if(NULL != input_state)
+	{
+		down = input_state->data.binary_state;
+	}
+	/*
+	else if(down)
+	{
+		rodeo_audio_playSample();
+	}
+	*/
+
+	return &down;
+}
+
+void*
+play_sound_input3(rodeo_input_any_state_t *input_state, void *data)
+{
+	static bool down = false;
+
+	if(NULL != input_state)
+	{
+		down = input_state->data.binary_state;
+	}
+	/*
+	else if(down)
+	{
+		rodeo_audio_playSample();
+	}
+	*/
+
+	return &down;
+}
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -231,6 +269,12 @@ register_inputs(void)
 	inputs.play_sound = rodeo_input_command_create(
 		rodeo_input_type_Binary
 	);
+	inputs.play_sound2 = rodeo_input_command_create(
+		rodeo_input_type_Binary
+	);
+	inputs.play_sound3 = rodeo_input_command_create(
+		rodeo_input_type_Binary
+	);
 	// --
 
 	// - register inputs -
@@ -252,6 +296,8 @@ register_inputs(void)
 	rodeo_input_command_register_boundedRange_controllerAxis(inputs.right, rodeo_input_boundedRange_controllerAxisLeft_X);
 
 	rodeo_input_command_register_binary_scancode(inputs.play_sound, rodeo_input_binary_scancode_M);
+	rodeo_input_command_register_binary_scancode(inputs.play_sound2, rodeo_input_binary_scancode_N);
+	rodeo_input_command_register_binary_scancode(inputs.play_sound3, rodeo_input_binary_scancode_B);
 	// --
 
 	// - register callbacks -
@@ -262,6 +308,8 @@ register_inputs(void)
 	rodeo_input_command_register_callback(inputs.right, *units_move_right_input);
 
 	rodeo_input_command_register_callback(inputs.play_sound, *play_sound_input);
+	rodeo_input_command_register_callback(inputs.play_sound2, *play_sound_input2);
+	rodeo_input_command_register_callback(inputs.play_sound3, *play_sound_input3);
 	// --
 
 	// - register commands -
@@ -272,6 +320,8 @@ register_inputs(void)
 	rodeo_input_scene_register_command(inputs.scene, inputs.right);
 
 	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound);
+	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound2);
+	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound3);
 	// --
 
 	// activate scene

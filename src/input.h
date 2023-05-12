@@ -11,6 +11,8 @@ struct
 	rodeo_input_command_t *up;
 	rodeo_input_command_t *down;
 	rodeo_input_command_t *play_sound;
+	rodeo_input_command_t *play_sound2;
+	rodeo_input_command_t *play_sound3;
 }
 scenes_and_commands_t;
 
@@ -54,6 +56,18 @@ units_move_down_input(
 
 void*
 play_sound_input(
+	rodeo_input_any_state_t *input_state,
+	void *data
+);
+
+void*
+play_sound_input2(
+	rodeo_input_any_state_t *input_state,
+	void *data
+);
+
+void*
+play_sound_input3(
 	rodeo_input_any_state_t *input_state,
 	void *data
 );

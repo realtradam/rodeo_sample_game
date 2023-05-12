@@ -121,8 +121,19 @@ main_loop(void)
 
 		if(*(bool*)play_sound_input(NULL, NULL))
 		{
-			rodeo_audio_sound_play(scratch, -1);
+			rodeo_audio_sound_play(scratch, 0);
 		}
+		if(*(bool*)play_sound_input2(NULL, NULL))
+		{
+			rodeo_audio_sound_play(scratch, 1);
+		}
+		if(*(bool*)play_sound_input3(NULL, NULL))
+		{
+			rodeo_audio_sound_play(scratch, 2);
+		}
+
+		rodeo_audio_channelPool_volume_set(1, 0.75);
+		rodeo_audio_channelPool_volume_set(2, 0.25);
 		
 		//play_sound_input(NULL, NULL);
 
@@ -278,6 +289,9 @@ main(void)
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
+
+		rodeo_audio_channelPool_volume_set(1, 0.75);
+		rodeo_audio_channelPool_volume_set(2, 0.25);
 
 		rodeo_mainLoop_run(
 			main_loop
