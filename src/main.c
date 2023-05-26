@@ -2,6 +2,7 @@
 #include "rodeo.h"
 #include <inttypes.h>
 #include "input.h"
+#include "rodeo/collision.h"
 
 cstr renderer;
 float time_var;
@@ -18,6 +19,8 @@ struct
 summon_t;
 
 summon_t summon_position = { .x = 100, .y = 100 };
+summon_t box1_position = { .x = 100, .y = 100 };
+summon_t box2_position = { .x = 100, .y = 100 };
 
 float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 
@@ -68,6 +71,10 @@ const rodeo_color_RGBAFloat_t pink_clear =
 	.colors.alpha = 0.5f
 };
 
+rodeo_collision_2d_world_t world_orc;
+rodeo_collision_2d_world_t world_other;
+world_id orc_collision_id;
+
 void
 summon_units(void)
 {
@@ -86,6 +93,18 @@ summon_units(void)
 			} };
 		}
 	}
+}
+
+void collision_resolve(
+		rodeo_collision_2d_world_item_t *a,
+		rodeo_collision_2d_world_item_t *b
+) {
+	rodeo_log(
+		rodeo_logLevel_info,
+		"%d collided with %d",
+		a->id.id, b->id.id
+	);
+	rodeo_collision_2d_world_item_destroy(b);
 }
 
 void
@@ -119,6 +138,15 @@ main_loop(void)
 		units_move_right_input(NULL, &reset_movement);
 		summon_position.x += *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
 		summon_position.y += *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+
+		rodeo_collision_2d_world_item_t* orc_collision_item = rodeo_collision_2d_world_item_get_by_id(orc_collision_id);
+
+		orc_collision_item->x = summon_position.x;
+		orc_collision_item->y = summon_position.y;
+		orc_collision_item->dx = *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
+		orc_collision_item->dy = *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+
+		rodeo_collision_2d_world_compare_self(&world_orc, collision_resolve);
 
 		if(*(bool*)play_sound_input(NULL, NULL))
 		{
@@ -282,6 +310,32 @@ main(void)
 		//	2,
 		//	texture_memory
 		//);
+		
+		world_orc = rodeo_collision_2d_world_create();
+		world_other = rodeo_collision_2d_world_create();
+
+		rodeo_collision_2d_world_item_t orc_collision_params = {
+			.x = summon_position.x,
+			.y = summon_position.y,
+			.width = orc_size[0],
+			.height = orc_size[1]
+		};
+		orc_collision_id = rodeo_collision_2d_world_item_create(&world_orc, orc_collision_params)->id;
+		
+		rodeo_collision_2d_world_item_t test_collision_params = {
+			.x = 320,
+			.y = 240,
+			.width = orc_size[0],
+			.height = orc_size[1]
+		};
+		rodeo_collision_2d_world_item_create(&world_orc, test_collision_params);
+		rodeo_collision_2d_world_item_t test2_collision_params = {
+			.x = 0,
+			.y = 240,
+			.width = orc_size[0],
+			.height = orc_size[1]
+		};
+		rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params);
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
@@ -292,6 +346,8 @@ main(void)
 		);
 
 		rodeo_texture_2d_destroy(&texture);
+		rodeo_collision_2d_world_destroy(&world_orc);
+		rodeo_collision_2d_world_destroy(&world_other);
 
 	}
 
