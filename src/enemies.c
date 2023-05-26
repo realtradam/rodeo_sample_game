@@ -53,6 +53,19 @@ draw_enemies(void)
 	}
 }
 
+enemy_t*
+get_enemy_by_id(
+    world_id id
+)
+{
+	c_foreach(i, cvec_enemy_t, enemies) {
+		if (i.ref->id.id == id.id) {
+			return i.ref;
+		}
+	}
+	return NULL;
+}
+
 rodeo_collision_2d_world_t
 get_enemies_world(void)
 {

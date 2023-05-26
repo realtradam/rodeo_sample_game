@@ -29,6 +29,10 @@ spawn_enemy(
 void
 draw_enemies(void);
 
+enemy_t*
+get_enemy_by_id(
+    world_id id
+);
 
 rodeo_collision_2d_world_t
 get_enemies_world(void);
