@@ -1,5 +1,8 @@
 [Bb]uild_[Dd]ir
 
+# vim files
+*.vim
+
 # CMake
 CMakeLists.txt.user
 CMakeCache.txt
