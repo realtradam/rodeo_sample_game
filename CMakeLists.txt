@@ -39,6 +39,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	external/RodeoKit/external/cglm/include
 	)
 target_link_libraries(${PROJECT_NAME} PUBLIC RodeoKit)
+target_link_libraries(${PROJECT_NAME} PUBLIC m)
 
 if(DEFINED EMSCRIPTEN)
 	set(CMAKE_EXECUTABLE_SUFFIX ".html")
