@@ -25,7 +25,6 @@ static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 void
 init_player(void)
 {
-	//player_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
 	player.sprite.config.texture = &player.texture;
 	player_collision_world = rodeo_collision_2d_world_create();
@@ -63,6 +62,7 @@ draw_player(void)
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 	draw_sprite(&player.sprite, player_position->x, player_position->y, 0.25f);
 	/*
+	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
 				.x = (float)(int32_t)player->x - (orc_size[0] / 2.0f),
@@ -79,7 +79,7 @@ draw_player(void)
 			NULL,
 			&player_texture
 		);
-		*/
+	*/
 }
 
 void
@@ -128,4 +128,22 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 	}
 }
 
+void player_enemy_resolver(
+	rodeo_collision_2d_world_item_t *player_collision,
+	rodeo_collision_2d_world_item_t *enemy_collision
+)
+{
+	if (player.damage_cooldown > 1.0) {
+		player.hp -= 10;
+		player.damage_cooldown = 0;
+	}
+	if (player.hp <= 0) {
+		//game over
+	}
+}
 
+void
+detect_player_enemy_collisions(void)
+{
+
+}
