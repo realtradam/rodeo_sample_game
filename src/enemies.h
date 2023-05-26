@@ -34,7 +34,7 @@ get_enemy_by_id(
     world_id id
 );
 
-rodeo_collision_2d_world_t
+rodeo_collision_2d_world_t *
 get_enemies_world(void);
 
 cvec_enemy_t

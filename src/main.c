@@ -189,6 +189,7 @@ main_loop(void)
 	   draw_player();
 	   draw_enemies();
 	   detect_bullet_enemy_collisions();
+	   detect_player_enemy_collisions();
 
 		rodeo_debug_text_draw(
 			1,
@@ -271,7 +272,7 @@ main(void)
 		init_player();
 		init_enemies();
 		spawn_enemy(240, 240);
-		spawn_enemy(100, 100);
+		//spawn_enemy(100, 100);
 		spawn_enemy(300, 100);
 		spawn_enemy(200, 330);
 
