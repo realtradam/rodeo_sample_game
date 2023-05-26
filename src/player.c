@@ -2,7 +2,17 @@
 #include "input.h"
 #include "player.h"
 #include "rodeo/collision.h"
+#include "sprite.h"
+
 static rodeo_texture_2d_t player_texture;
+static sprite_t player_sprite = {
+	.iter = 0,
+	.config = {
+		.width = 128,
+		.height = 128,
+		.count = 61
+	}
+};
 static world_id player_collision_id;
 static rodeo_collision_2d_world_t player_collision_world;
 
@@ -11,7 +21,9 @@ static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 void
 init_player(void)
 {
-	player_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+	//player_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+	player_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
+	player_sprite.config.texture = &player_texture;
 	player_collision_world = rodeo_collision_2d_world_create();
 	player_collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
@@ -35,6 +47,8 @@ void
 draw_player(void)
 {
 	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
+	draw_sprite(&player_sprite, player->x, player->y, 0.25f);
+	/*
 	   rodeo_texture_2d_draw(
 			&(rodeo_rectangle_t){
 				.x = (float)(int32_t)player->x - (orc_size[0] / 2.0f),
@@ -51,7 +65,7 @@ draw_player(void)
 			NULL,
 			&player_texture
 		);
-
+		*/
 }
 
 void
@@ -70,6 +84,8 @@ parse_player_input(void)
 void
 move_player(void)
 {
+	player_sprite.iter += 1;
+	player_sprite.iter %= player_sprite.config.count;
 	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
 	player->x += player->dx;
 	player->dx = 0;
