@@ -2,6 +2,7 @@
 #include "rodeo.h"
 #include <inttypes.h>
 #include "input.h"
+#include "enemies.h"
 #include "rodeo/collision.h"
 
 cstr renderer;
@@ -198,7 +199,7 @@ main_loop(void)
 		orc_collision_item->dx = *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
 		orc_collision_item->dy = *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
 
-		rodeo_collision_2d_world_compare_self(&world_orc, collision_resolve);
+		//rodeo_collision_2d_world_compare_self(&world_orc, collision_resolve);
 
 		if(*(bool*)play_sound_input(NULL, NULL))
 		{
@@ -252,7 +253,7 @@ main_loop(void)
 	   		&pink_clear
 	   );
 
-
+       /*
 	   for(uint64_t i = 0; i < (sizeof(box_collision_ids) / sizeof(box_collision_ids[0])); ++i)
 	   {
 		   rodeo_collision_2d_world_item_t *box = rodeo_collision_2d_world_item_get_by_id(box_collision_ids[i]);
@@ -264,8 +265,10 @@ main_loop(void)
 			);
 		   }
 	   }
+	   */
 
 	   draw_bullets();
+	   draw_enemies();
 
 	   for(uint64_t i = 0; i < num_of_units; ++i)
 	   {
@@ -387,6 +390,7 @@ main(void)
 		};
 		orc_collision_id = rodeo_collision_2d_world_item_create(&world_orc, orc_collision_params)->id;
 		
+		/*
 		rodeo_collision_2d_world_item_t test_collision_params = {
 			.x = 320,
 			.y = 240,
@@ -401,11 +405,15 @@ main(void)
 			.height = orc_size[1]
 		};
 		box_collision_ids[1] = rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params)->id;
+		*/
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 		bullet_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
 		music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
+
+		init_enemies();
+		spawn_enemy(240, 240);
 
 		rodeo_mainLoop_run(
 			main_loop
@@ -415,6 +423,7 @@ main(void)
 		rodeo_collision_2d_world_destroy(&world_orc);
 		rodeo_collision_2d_world_destroy(&world_other);
 
+		deinit_enemies();
 	}
 
 	unregister_inputs();

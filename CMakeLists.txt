@@ -7,6 +7,7 @@ project(demo
 add_executable(${PROJECT_NAME}
 	"src/main.c"
 	"src/input.c"
+	"src/enemies.c"
 	)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
