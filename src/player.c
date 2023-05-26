@@ -112,12 +112,6 @@ parse_player_input(void)
 void
 move_player(void)
 {
-	rodeo_log(
-		rodeo_logLevel_info,
-		"%d, %d\n",
-		player.move_state,
-		player.sprite.iter
-	);
 	if(player.move_state != mv_state_standing)
 	{
 		player.sprite.iter += 1;
@@ -186,4 +180,10 @@ detect_player_enemy_collisions(void)
 {
 	player.damage_timer += rodeo_frame_time_get();
 	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemies_world(), player_enemy_resolver);
+}
+
+cvec_collision_2d_world_item_value *
+get_player_position(void)
+{
+		return rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 }

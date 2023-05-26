@@ -3,6 +3,7 @@
 -I../external/RodeoKit/external/bgfx/include
 -I../external/RodeoKit/external/bx/include
 -I../external/RodeoKit/external/STC/include
+-I../external/RodeoKit/external/cglm/include
 -Wall
 -Wextra
 -Wpedantic

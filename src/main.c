@@ -185,6 +185,8 @@ main_loop(void)
 	   */
 
 	   move_bullets();
+	   move_enemies();
+	   group_follow_target(get_player_position());
 	   draw_bullets();
 	   draw_player();
 	   draw_enemies();

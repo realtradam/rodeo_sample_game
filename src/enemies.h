@@ -29,6 +29,9 @@ spawn_enemy(
 void
 draw_enemies(void);
 
+void
+move_enemies(void);
+
 enemy_t*
 get_enemy_by_id(
     world_id id
@@ -46,3 +49,6 @@ void enemy_destroy(
 
 void
 detect_bullet_enemy_collisions(void);
+
+void
+group_follow_target(rodeo_collision_2d_world_item_t *target);

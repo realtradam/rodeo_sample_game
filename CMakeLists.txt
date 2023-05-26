@@ -36,6 +36,7 @@ add_dependencies(${PROJECT_NAME} RodeoKit)
 target_include_directories(${PROJECT_NAME} PUBLIC
 	external/RodeoKit/include
 	src
+	external/RodeoKit/external/cglm/include
 	)
 target_link_libraries(${PROJECT_NAME} PUBLIC RodeoKit)
 

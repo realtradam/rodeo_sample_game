@@ -1,5 +1,6 @@
 #include "enemies.h"
 #include "bullet.h"
+#include <math.h>
 
 static rodeo_collision_2d_world_t collision_enemies_world;
 static rodeo_texture_2d_t enemy_texture;
@@ -51,6 +52,18 @@ draw_enemies(void)
 				NULL,
 				&enemy_texture
 				);
+	}
+}
+
+void
+move_enemies(void)
+{
+	c_foreach(i, cvec_enemy_t, enemies) {
+		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		enemy->x += enemy->dx;
+		enemy->dx = 0;
+		enemy->y += enemy->dy;
+		enemy->dy = 0;
 	}
 }
 
@@ -107,4 +120,24 @@ void
 detect_bullet_enemy_collisions(void)
 {
 	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_player_bullet_world(), damage_enemy_resolver);
+}
+
+void
+group_follow_target(rodeo_collision_2d_world_item_t *target)
+{
+	c_foreach(i, cvec_enemy_t, enemies) {
+		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		float direction[2] = {
+			target->x - enemy->x,
+			target->y - enemy->y
+		};
+		float mag = sqrtf(direction[0] * direction[0] + direction[1] * direction[1]);
+		direction[0] /= mag;
+		direction[1] /= mag;
+
+		enemy->dx = direction[0];
+		enemy->dy = direction[1];
+	}
+	
+	
 }
