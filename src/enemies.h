@@ -39,3 +39,10 @@ get_enemies_world(void);
 
 cvec_enemy_t
 get_enemies_cvec(void);
+
+void enemy_destroy(
+	cvec_enemy_t_value* enemy 
+);
+
+void
+detect_bullet_enemy_collisions(void);

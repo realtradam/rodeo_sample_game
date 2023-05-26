@@ -1,4 +1,5 @@
 #include "enemies.h"
+#include "bullet.h"
 
 static rodeo_collision_2d_world_t collision_enemies_world;
 static rodeo_texture_2d_t enemy_texture;
@@ -76,4 +77,34 @@ cvec_enemy_t
 get_enemies_cvec(void)
 {
 	return enemies;
+}
+
+void enemy_destroy(
+	cvec_enemy_t_value* enemy 
+)
+{
+	rodeo_collision_2d_world_item_destroy_by_id(enemy->id);
+	*enemy = *cvec_enemy_t_back(&enemies);
+    cvec_enemy_t_pop(&enemies);
+
+}
+
+void
+damage_enemy_resolver(
+	rodeo_collision_2d_world_item_t *enemy_collision,
+	rodeo_collision_2d_world_item_t *bullet_collision
+)
+{
+	rodeo_collision_2d_world_item_destroy(bullet_collision);
+	enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
+	enemy->hp -= 10;
+	if (enemy->hp <= 0) {
+		enemy_destroy(enemy);
+	}
+}
+
+void
+detect_bullet_enemy_collisions(void)
+{
+	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_player_bullet_world(), damage_enemy_resolver);
 }
