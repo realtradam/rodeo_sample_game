@@ -25,6 +25,7 @@ summon_t box2_position = { .x = 100, .y = 100 };
 float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 
 rodeo_texture_2d_t texture;
+rodeo_texture_2d_t bullet_texture;
 
 rodeo_vector2_t units[UINT16_MAX][2] = {0};
 uint16_t num_of_units = 0;
@@ -73,8 +74,58 @@ const rodeo_color_RGBAFloat_t pink_clear =
 
 rodeo_collision_2d_world_t world_orc;
 rodeo_collision_2d_world_t world_other;
+rodeo_collision_2d_world_t collision_bullets_world;
+
 world_id orc_collision_id;
 world_id box_collision_ids[2] = { 0 };
+
+void
+player_shoot(void)
+{
+	const uint32_t bullet_per_frame = 10;
+	for(uint32_t i = 0; i < bullet_per_frame; ++i)
+	{
+		rodeo_collision_2d_world_item_create(
+			&collision_bullets_world,
+			(rodeo_collision_2d_world_item_t){
+			.x = (float)summon_position.x - (orc_size[0] / 2.0f),
+			.y = (float)summon_position.y - (orc_size[1] / 2.0f),
+			.dx = (float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+			.dy = (float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+			.width = 25.0f,
+			.height = 25.0f
+			}
+		);
+	}
+}
+
+void
+draw_bullets(void)
+{
+	c_foreach(i, cvec_collision_2d_world_item, collision_bullets_world) {
+		cvec_collision_2d_world_item_value *bullet = i.ref;
+		bullet->x += bullet->dx;
+		bullet->y += bullet->dy;
+
+		   rodeo_texture_2d_draw(
+				&(rodeo_rectangle_t){
+					.x = bullet->x,
+					.y = bullet->y,
+					.width = bullet->width,
+					.height = bullet->height,
+				},
+				&(rodeo_rectangle_t){
+					.x = 0,
+					.y = 0,
+					.width = 25,
+					.height = 25
+				},
+				NULL,
+				&bullet_texture
+				);
+	   }
+}
+
 
 void
 summon_units(void)
@@ -164,7 +215,7 @@ main_loop(void)
 
 		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
-			summon_units();
+			player_shoot();
 		}
 
 		rodeo_rectangle_draw(
@@ -213,6 +264,8 @@ main_loop(void)
 			);
 		   }
 	   }
+
+	   draw_bullets();
 
 	   for(uint64_t i = 0; i < num_of_units; ++i)
 	   {
@@ -350,6 +403,7 @@ main(void)
 		box_collision_ids[1] = rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params)->id;
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+		bullet_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
 		music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
 
