@@ -1,6 +1,7 @@
 #include "rodeo.h"
 #include "input.h"
 #include "player.h"
+#include "enemies.h"
 #include "rodeo/collision.h"
 #include "sprite.h"
 
@@ -9,7 +10,7 @@ struct player_t
 	sprite_t sprite;
 	rodeo_texture_2d_t texture;
 	int32_t hp;
-	float damage_timer;
+	float damage_timer; //ms
 	world_id collision_id;
 	move_state_t move_state;
 }
@@ -46,8 +47,8 @@ init_player(void)
 		.height = 128,
 		.count = 61
 	}
-};
-
+	};
+	player.hp = 100;
 }
 
 void
@@ -157,23 +158,32 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 				);
 	}
 }
-/*
+
 void player_enemy_resolver(
 	rodeo_collision_2d_world_item_t *player_collision,
 	rodeo_collision_2d_world_item_t *enemy_collision
 )
 {
-	if (player.damage_timer > 1.0) {
+	if (player.hp <= 0) {
+		rodeo_log(
+			rodeo_logLevel_info,
+			"player is dead"
+		);
+	} else if (player.damage_timer > 1000.0) {
+		rodeo_log(
+			rodeo_logLevel_info,
+			"player health is now %d",
+			player.hp
+		);
 		player.hp -= 10;
 		player.damage_timer = 0;
 	}
-	if (player.hp <= 0) {
-		//game over
-	}
+
 }
-*/
+
 void
 detect_player_enemy_collisions(void)
 {
-
+	player.damage_timer += rodeo_frame_time_get();
+	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemies_world(), player_enemy_resolver);
 }

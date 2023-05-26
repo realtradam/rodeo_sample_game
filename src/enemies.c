@@ -67,10 +67,10 @@ get_enemy_by_id(
 	return NULL;
 }
 
-rodeo_collision_2d_world_t
+rodeo_collision_2d_world_t *
 get_enemies_world(void)
 {
-    return collision_enemies_world;
+    return &collision_enemies_world;
 }
 
 cvec_enemy_t
