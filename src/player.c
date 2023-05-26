@@ -12,6 +12,7 @@ struct player_t
 	int32_t hp;
 	float damage_timer; //ms
 	world_id collision_id;
+	move_state_t move_state;
 }
 player;
 
@@ -92,15 +93,44 @@ parse_player_input(void)
 	units_move_down_input(NULL, &reset_movement);
 	units_move_left_input(NULL, &reset_movement);
 	units_move_right_input(NULL, &reset_movement);
-	player_position->dx = *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
-	player_position->dy = *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+
+	// if you arent mid jump, then record attempted movement
+	if(player.move_state != mv_state_jumping)
+	{
+		player_position->dx = *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
+		player_position->dy = *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+
+		if(((player_position->dy != 0) || (player_position->dx != 0)) && player.move_state == mv_state_standing)
+		{
+			player.move_state = mv_state_jumping;
+			player_position->dy = 0;
+			player_position->dx = 0;
+		}
+	}
 }
 
 void
 move_player(void)
 {
-	player.sprite.iter += 1;
-	player.sprite.iter %= player.sprite.config.count;
+	rodeo_log(
+		rodeo_logLevel_info,
+		"%d, %d\n",
+		player.move_state,
+		player.sprite.iter
+	);
+	if(player.move_state != mv_state_standing)
+	{
+		player.sprite.iter += 1;
+		player.sprite.iter %= player.sprite.config.count;
+		if(player.sprite.iter > 19)
+		{
+			player.move_state = mv_state_mid_air;
+		}
+	}
+	if(player.sprite.iter == 60)
+	{
+		player.move_state = mv_state_standing;
+	}
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 	player_position->x += player_position->dx;
 	player_position->dx = 0;
