@@ -9,6 +9,7 @@ add_executable(${PROJECT_NAME}
 	"src/input.c"
 	"src/player.c"
 	"src/bullet.c"
+	"src/enemies.c"
 	)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)

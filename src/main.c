@@ -4,6 +4,7 @@
 #include "input.h"
 #include "player.h"
 #include "bullet.h"
+#include "enemies.h"
 #include "rodeo/collision.h"
 
 cstr renderer;
@@ -169,6 +170,7 @@ main_loop(void)
 	   );
 
 	   // debug test for collisions
+       /*
 	   for(uint64_t i = 0; i < (sizeof(box_collision_ids) / sizeof(box_collision_ids[0])); ++i)
 	   {
 		   rodeo_collision_2d_world_item_t *box = rodeo_collision_2d_world_item_get_by_id(box_collision_ids[i]);
@@ -180,10 +182,12 @@ main_loop(void)
 			);
 		   }
 	   }
+	   */
 
 	   move_bullets();
 	   draw_bullets();
 	   draw_player();
+	   draw_enemies();
 
 		rodeo_debug_text_draw(
 			1,
@@ -242,6 +246,7 @@ main(void)
 		world_orc = rodeo_collision_2d_world_create();
 		world_other = rodeo_collision_2d_world_create();
 
+		/*
 		rodeo_collision_2d_world_item_t test_collision_params = {
 			.x = 320,
 			.y = 240,
@@ -256,12 +261,15 @@ main(void)
 			.height = orc_size[1]
 		};
 		box_collision_ids[1] = rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params)->id;
+		*/
 
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
 		music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
 
 		init_bullets();
 		init_player();
+		init_enemies();
+		spawn_enemy(240, 240);
 
 		rodeo_mainLoop_run(
 			main_loop
@@ -272,6 +280,7 @@ main(void)
 		rodeo_collision_2d_world_destroy(&world_orc);
 		rodeo_collision_2d_world_destroy(&world_other);
 
+		deinit_enemies();
 	}
 
 	unregister_inputs();
