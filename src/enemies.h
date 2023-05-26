@@ -29,3 +29,9 @@ spawn_enemy(
 void
 draw_enemies(void);
 
+
+rodeo_collision_2d_world_t
+get_enemies_world(void);
+
+cvec_enemy_t
+get_enemies_cvec(void);
