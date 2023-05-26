@@ -131,9 +131,9 @@ move_player(void)
 		player.move_state = mv_state_standing;
 	}
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	player_position->x += player_position->dx;
+	player_position->x += player_position->dx * ((60.0f - (float)player.sprite.iter) / 60.0f);
 	player_position->dx = 0;
-	player_position->y += player_position->dy;
+	player_position->y += player_position->dy * ((60.0f - (float)player.sprite.iter) / 60.0f);
 	player_position->dy = 0;
 }
 
