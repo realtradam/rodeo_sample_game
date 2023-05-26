@@ -4,6 +4,15 @@
 #include "rodeo/collision.h"
 #include "input.h"
 
+typedef
+enum
+{
+	mv_state_standing,
+	mv_state_jumping,
+	mv_state_mid_air
+}
+move_state_t;
+
 void
 init_player(void);
 
