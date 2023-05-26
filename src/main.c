@@ -74,6 +74,7 @@ const rodeo_color_RGBAFloat_t pink_clear =
 rodeo_collision_2d_world_t world_orc;
 rodeo_collision_2d_world_t world_other;
 world_id orc_collision_id;
+world_id box_collision_ids[2] = { 0 };
 
 void
 summon_units(void)
@@ -201,6 +202,17 @@ main_loop(void)
 	   );
 
 
+	   for(uint64_t i = 0; i < (sizeof(box_collision_ids) / sizeof(box_collision_ids[0])); ++i)
+	   {
+		   rodeo_collision_2d_world_item_t *box = rodeo_collision_2d_world_item_get_by_id(box_collision_ids[i]);
+		   if(box != NULL)
+		   {
+		   rodeo_rectangle_draw(
+				&(rodeo_rectangle_t){ box->x, box->y, box->width, box->height },
+				&pink
+			);
+		   }
+	   }
 
 	   for(uint64_t i = 0; i < num_of_units; ++i)
 	   {
@@ -328,14 +340,14 @@ main(void)
 			.width = orc_size[0],
 			.height = orc_size[1]
 		};
-		rodeo_collision_2d_world_item_create(&world_orc, test_collision_params);
+		box_collision_ids[0] = rodeo_collision_2d_world_item_create(&world_orc, test_collision_params)->id;
 		rodeo_collision_2d_world_item_t test2_collision_params = {
 			.x = 0,
 			.y = 240,
 			.width = orc_size[0],
 			.height = orc_size[1]
 		};
-		rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params);
+		box_collision_ids[1] = rodeo_collision_2d_world_item_create(&world_orc, test2_collision_params)->id;
 
 		texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
 		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
