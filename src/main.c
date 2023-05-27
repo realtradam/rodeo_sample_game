@@ -5,7 +5,12 @@
 #include "player.h"
 #include "bullet.h"
 #include "enemies.h"
+#include "wall.h"
 #include "rodeo/collision.h"
+
+const uint16_t window_width = 640;
+const uint16_t window_height = 480;
+
 
 cstr renderer;
 float time_var;
@@ -192,6 +197,7 @@ main_loop(void)
 	   draw_enemies();
 	   detect_bullet_enemy_collisions();
 	   detect_player_enemy_collisions();
+	   detect_player_wall_collisions();
 
 		rodeo_debug_text_draw(
 			1,
@@ -235,7 +241,7 @@ main(void)
 		rodeo_logLevel_error,
 		"Testing error log level... It seems to work!"
 	);
-	mrodeo_window_do(480, 640, cstr_lit("Rodeo Window"))
+	mrodeo_window_do(window_height, window_width, cstr_lit("Rodeo Window"))
 	{
 		renderer = rodeo_renderer_name_get();
 		rodeo_frame_limit_set(60);
@@ -266,10 +272,15 @@ main(void)
 		init_bullets();
 		init_player();
 		init_enemies();
+		init_wall();
 		spawn_enemy(240, 240);
 		//spawn_enemy(100, 100);
 		spawn_enemy(300, 100);
 		spawn_enemy(200, 330);
+		new_wall(0, -10, window_width, 10);
+		new_wall(0, window_height, window_width, 10);
+		new_wall(-10, 0, 10, window_height);
+		new_wall(window_width, 0, 10, window_height);
 
 		rodeo_mainLoop_run(
 			main_loop
