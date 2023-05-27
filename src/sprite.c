@@ -7,8 +7,8 @@ draw_sprite(sprite_t *sprite, float x, float y, float scale)
 {
 	rodeo_texture_2d_draw(
 		&(rodeo_rectangle_t){
-			.x = x - ((float)sprite->config.width * scale / 2),
-			.y = y - ((float)sprite->config.height * scale / 2),
+			.x = x,
+			.y = y,
 			.width = (float)sprite->config.width * scale,
 			.height = (float)sprite->config.height * scale 
 		},
