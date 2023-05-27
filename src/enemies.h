@@ -14,6 +14,7 @@ enemy_ai_behavior;
 typedef
 enum
 {
+	enemy_weapon_none,
 	enemy_weapon_basic,
 	//enemy_weapon_fourplus,
 	//enemy_weapon_fourcross,
@@ -27,8 +28,12 @@ struct
     world_id id;
 	enemy_ai_behavior behavior;
 	float move_speed;
-	enemy_weapon_type weapon;
-	float firerate;
+	struct enemy_weapon
+	{
+		enemy_weapon_type type;
+		float firerate;
+		float cooldown;
+	} weapon;
 
 } enemy_t;
 
@@ -36,6 +41,8 @@ struct
 #define i_opt c_no_cmp
 #include "stc/cvec.h"
 
+void
+enemies_attempt_weapon_fire(void);
 
 void
 init_enemies(void);

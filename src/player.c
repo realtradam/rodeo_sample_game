@@ -3,6 +3,7 @@
 #include "player.h"
 #include "enemies.h"
 #include "rodeo/collision.h"
+#include "bullet.h"
 #include "sprite.h"
 
 struct player_t
@@ -139,16 +140,13 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 	const uint32_t bullet_per_frame = 10;
 	for(uint32_t i = 0; i < bullet_per_frame; ++i)
 	{
-		rodeo_collision_2d_world_item_create(
+		spawn_bullet(
+				(float)player_position->x - (orc_size[0] / 2.0f),
+				(float)player_position->y - (orc_size[1] / 2.0f),
+				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
 				bullet_collision_world,
-				(rodeo_collision_2d_world_item_t){
-				.x = (float)player_position->x - (orc_size[0] / 2.0f),
-				.y = (float)player_position->y - (orc_size[1] / 2.0f),
-				.dx = (float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
-				.dy = (float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
-				.width = 25.0f,
-				.height = 25.0f
-				}
+				(rodeo_color_RGBAFloat_t){ .array = { 1,1,1,1 } }
 				);
 	}
 }

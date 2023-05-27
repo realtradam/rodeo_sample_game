@@ -1,12 +1,14 @@
 #include "rodeo.h"
 #include "input.h"
 #include "player.h"
+#include "bullet.h"
 #include "rodeo/collision.h"
 
 static rodeo_texture_2d_t bullet_texture;
-static rodeo_collision_2d_world_t bullet_collision_world;
-static rodeo_collision_2d_world_t player_bullet_collision_world;
-static rodeo_collision_2d_world_t enemy_bullet_collision_world;
+//static rodeo_collision_2d_world_t bullet_collision_world;
+static rodeo_collision_2d_world_t player_bullet_collision_world = {0};
+static rodeo_collision_2d_world_t enemy_bullet_collision_world = {0};
+static cvec_bullet_t bullets = {0};
 
 void
 init_bullets(void)
@@ -18,6 +20,36 @@ void
 deinit_bullets(void)
 {
 	rodeo_texture_2d_destroy(&bullet_texture);
+}
+
+bullet_t *
+spawn_bullet(
+	float x,
+	float y,
+	float dx,
+	float dy,
+	rodeo_collision_2d_world_t *bullet_world,
+	rodeo_color_RGBAFloat_t color
+)
+{
+	bullet_t bullet = {
+		.color = color
+	};
+	bullet.id = rodeo_collision_2d_world_item_create(
+		bullet_world,
+		(rodeo_collision_2d_world_item_t){
+			.x = x,
+			.y = y,
+			.dx = dx,
+			.dy = dy,
+			.width = 25.0f,
+			.height = 25.0f
+		}
+	)->id;
+	return cvec_bullet_t_push(
+		&bullets,
+		bullet
+	);
 }
 
 void
@@ -36,11 +68,25 @@ move_bullets(void)
 
 }
 
+bullet_t*
+get_bullet_by_id(
+	world_id id
+)
+{
+	c_foreach(i, cvec_bullet_t, bullets) {
+		if (i.ref->id.id == id.id) {
+			return i.ref;
+		}
+	}
+	return NULL;
+}
+
 void
 draw_bullets(void)
 {
 	c_foreach(i, cvec_collision_2d_world_item, player_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
+		bullet_t *bullet_obj = get_bullet_by_id(i.ref->id);
 		   rodeo_texture_2d_draw(
 				&(rodeo_rectangle_t){
 					.x = bullet->x,
@@ -54,12 +100,13 @@ draw_bullets(void)
 					.width = 25,
 					.height = 25
 				},
-				NULL,
+				&bullet_obj->color,
 				&bullet_texture
 				);
 	   }
 	c_foreach(i, cvec_collision_2d_world_item, enemy_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
+		bullet_t *bullet_obj = get_bullet_by_id(i.ref->id);
 		   rodeo_texture_2d_draw(
 				&(rodeo_rectangle_t){
 					.x = bullet->x,
@@ -73,11 +120,12 @@ draw_bullets(void)
 					.width = 25,
 					.height = 25
 				},
-				NULL,
+				&bullet_obj->color,
 				&bullet_texture
 				);
 	   }
 }
+
 
 rodeo_collision_2d_world_t *
 get_enemy_bullet_world(void)

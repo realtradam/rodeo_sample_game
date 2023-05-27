@@ -184,6 +184,8 @@ main_loop(void)
 	   }
 	   */
 
+	   enemies_attempt_weapon_fire();
+
 	   move_bullets();
 	   move_enemies();
 	   group_follow_target(get_player_position());

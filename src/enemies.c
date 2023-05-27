@@ -1,16 +1,17 @@
 #include "enemies.h"
 #include "bullet.h"
 #include "cglm/vec2.h"
+#include "player.h"
 
-static rodeo_collision_2d_world_t collision_enemies_world;
+static rodeo_collision_2d_world_t collision_enemies_world = {0};
 static rodeo_texture_2d_t enemy_texture;
-static cvec_enemy_t enemies;
+static cvec_enemy_t enemies = {0};
 
 void
 init_enemies(void)
 {
-	collision_enemies_world = rodeo_collision_2d_world_create();
-	enemies = cvec_enemy_t_init();
+	//collision_enemies_world = rodeo_collision_2d_world_create();
+	//enemies = cvec_enemy_t_init();
 	enemy_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/enemy.png"));
 }
 
@@ -33,8 +34,11 @@ spawn_enemy(float x, float y)
 			.hp = 100.0,
 			.move_speed = 1.0f,
 			.behavior = enemy_ai_follow,
+			.weapon = {
 			.firerate = 1.0f,
-			.weapon = enemy_weapon_basic,
+			.type = enemy_weapon_basic,
+			.cooldown = 0,
+			},
 			.id = id
 		});
 }
@@ -102,6 +106,57 @@ move_enemies(void)
 		enemy->dx = 0;
 		enemy->y += enemy->dy;
 		enemy->dy = 0;
+	}
+}
+
+void
+enemies_attempt_weapon_fire(void)
+{
+	c_foreach(i, cvec_enemy_t, enemies) {
+		switch(i.ref->weapon.type)
+		{
+			case enemy_weapon_none:
+				{
+					// do nothing
+				}
+				break;
+			case enemy_weapon_basic:
+				{
+					if(i.ref->weapon.cooldown < 0)
+					{
+						i.ref->weapon.cooldown += i.ref->weapon.firerate;
+						//weapon spawn logic
+						cvec_collision_2d_world_item_value *player = get_player_position();
+						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+						vec2 dest;
+						glm_vec2_sub(
+							(vec2){ player->x, player->y },
+							(vec2){ enemy->x, enemy->y },
+							dest
+						);
+						glm_vec2_normalize(dest);
+						glm_vec2_scale(dest, 1.0, dest);
+						spawn_bullet(
+							enemy->x,
+							enemy->y,
+							dest[0],
+							dest[1],
+							get_enemy_bullet_world(),
+							(rodeo_color_RGBAFloat_t){
+								.colors.alpha = 1,
+								.colors.red = 0.9f,
+								.colors.green = 0.1f,
+								.colors.blue = 0.1f
+							}
+						);
+					}
+					else
+					{
+						i.ref->weapon.cooldown -= rodeo_frame_time_get()/1000.0f;
+					}
+				}
+				break;
+		}
 	}
 }
 
