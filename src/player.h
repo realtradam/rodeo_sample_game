@@ -34,6 +34,8 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world);
 void
 detect_player_enemy_collisions(void);
 
+void
+detect_player_wall_collisions(void);
 
 cvec_collision_2d_world_item_value *
 get_player_position(void);
