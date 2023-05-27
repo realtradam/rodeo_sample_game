@@ -13,6 +13,15 @@ enum
 }
 move_state_t;
 
+typedef
+struct
+{
+	float x;
+	float y;
+}
+aim_position_t;
+
+
 void
 init_player(void);
 
@@ -39,3 +48,11 @@ detect_player_wall_collisions(void);
 
 cvec_collision_2d_world_item_value *
 get_player_position(void);
+
+void
+update_aim_position(void);
+
+void
+draw_aim(float player_x, float player_y, float scale);
+
+

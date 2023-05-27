@@ -11,6 +11,7 @@ struct player_t
 {
 	sprite_t sprite;
 	rodeo_texture_2d_t texture;
+	rodeo_texture_2d_t aim_texture;
 	int32_t hp;
 	float damage_timer; //ms
 	world_id collision_id;
@@ -18,11 +19,14 @@ struct player_t
 }
 player;
 
+typedef struct player_t player_t;
+
 // 0-19 jumping
 // 61 standing
 // 20-60 mid iar
 
 static rodeo_collision_2d_world_t player_collision_world;
+static aim_position_t aim_position;
 
 static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 
@@ -30,6 +34,7 @@ void
 init_player(void)
 {
 	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
+	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
 	player.sprite.config.texture = &player.texture;
 	player_collision_world = rodeo_collision_2d_world_create();
 	player.collision_id = rodeo_collision_2d_world_item_create(
@@ -51,6 +56,8 @@ init_player(void)
 	}
 	};
 	player.hp = 100;
+	aim_position.x = 101;
+	aim_position.y = 100;
 }
 
 void
@@ -64,6 +71,7 @@ void
 draw_player(void)
 {
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+	draw_aim(player_position->x, player_position->y, 0.25f);
 	draw_sprite(&player.sprite, player_position->x, player_position->y, 0.25f);
 	/*
 	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
@@ -132,6 +140,7 @@ move_player(void)
 	player_position->dx = 0;
 	player_position->y += player_position->dy * ((60.0f - (float)player.sprite.iter) / 60.0f);
 	player_position->dy = 0;
+	update_aim_position();
 }
 
 void
@@ -237,4 +246,30 @@ cvec_collision_2d_world_item_value *
 get_player_position(void)
 {
 		return rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+}
+
+void
+update_aim_position(void)
+{
+
+}
+
+void
+draw_aim(float player_x, float player_y, float scale)
+{
+	rodeo_texture_2d_draw(
+			&(rodeo_rectangle_t){
+				//.x = player_x - (((128.0f * scale) * 1.3f) - (128.0f * scale) ),
+				.x = player_x - (((128.0f * scale) * 0.6f) / 2),
+				.y = player_y + ((((44.0f) * scale) * 0.6f) / 2) + (80.0f * scale),
+				.width = (128 * scale) * 1.6f,
+				.height = (44 * scale) * 1.6f,
+			},
+			&(rodeo_rectangle_t){
+				.width = 128,
+				.height = 44,
+			},
+			&(rodeo_color_RGBAFloat_t){ .array = {0.9f,0.9f,0.9f,1.0} },
+			&player.aim_texture
+		);
 }
