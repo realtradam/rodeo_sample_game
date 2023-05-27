@@ -142,8 +142,8 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 	for(uint32_t i = 0; i < bullet_per_frame; ++i)
 	{
 		spawn_bullet(
-				(float)player_position->x - (orc_size[0] / 2.0f),
-				(float)player_position->y - (orc_size[1] / 2.0f),
+				(float)player_position->x + (orc_size[0] / 2.0f) - 9.0f,
+				(float)player_position->y + (orc_size[1] / 2.0f) - 16.0f,
 				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
 				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
 				bullet_collision_world,
@@ -225,11 +225,6 @@ void player_wall_resolver(
 		p->dx = 0;
 		p->dy = 0;
 	}
-	rodeo_log(
-		rodeo_logLevel_info,
-		"%d collided with %d",
-		p->id.id, w->id.id
-	);
 }
 
 void
