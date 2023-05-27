@@ -247,13 +247,6 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 		vec2 result;
 		glm_vec2_scale(direction, get_enemy_by_id(enemy->id)->move_speed, result);
 
-		rodeo_log(
-			rodeo_logLevel_info,
-			"%f, %f\n",
-			result[0],
-			result[1]
-		);
-
 		enemy->dx = result[0];
 		enemy->dy = result[1];
 	}
