@@ -1,6 +1,6 @@
 #include "enemies.h"
 #include "bullet.h"
-#include <math.h>
+#include "cglm/vec2.h"
 
 static rodeo_collision_2d_world_t collision_enemies_world;
 static rodeo_texture_2d_t enemy_texture;
@@ -27,7 +27,16 @@ spawn_enemy(float x, float y)
 {
 	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 26, .height = 38};
 	world_id id = rodeo_collision_2d_world_item_create(&collision_enemies_world, enemy_collision)->id;
-	return cvec_enemy_t_push(&enemies, (enemy_t){.hp = 100.0, .id = id});
+	return cvec_enemy_t_push(
+		&enemies,
+		(enemy_t){
+			.hp = 100.0,
+			.move_speed = 1.0f,
+			.behavior = enemy_ai_follow,
+			.firerate = 1.0f,
+			.weapon = enemy_weapon_basic,
+			.id = id
+		});
 }
 
 void
@@ -56,8 +65,37 @@ draw_enemies(void)
 }
 
 void
-move_enemies(void)
+enemy_overlap_resolver(
+	rodeo_collision_2d_world_item_t *a,
+	rodeo_collision_2d_world_item_t *b
+)
 {
+	enemy_t *enemy_a = get_enemy_by_id(a->id);
+	enemy_t *enemy_b = get_enemy_by_id(b->id);
+	vec2 direction;
+	glm_vec2_sub(
+		(vec2){b->x, b->y},
+		(vec2){a->x, a->y},
+		direction
+	);
+	glm_vec2_normalize(direction);
+	vec2 enemy_a_direction;
+	vec2 enemy_b_direction;
+
+	glm_vec2_scale(direction, -enemy_a->move_speed, enemy_a_direction);
+	glm_vec2_scale(direction, enemy_b->move_speed, enemy_b_direction);
+
+	a->dx += enemy_a_direction[0];
+	a->dy += enemy_a_direction[1];
+	b->dx += enemy_b_direction[0];
+	b->dy += enemy_b_direction[1];
+}
+
+void
+move_enemies(void)
+{	
+  
+   rodeo_collision_2d_world_compare_self(get_enemies_world(), enemy_overlap_resolver);
 	c_foreach(i, cvec_enemy_t, enemies) {
 		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
 		enemy->x += enemy->dx;
@@ -128,6 +166,7 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 {
 	c_foreach(i, cvec_enemy_t, enemies) {
 		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		/*
 		float direction[2] = {
 			target->x - enemy->x,
 			target->y - enemy->y
@@ -138,7 +177,29 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 
 		enemy->dx = direction[0];
 		enemy->dy = direction[1];
+		*/
+		vec2 source = {
+			enemy->x,
+			enemy->y
+		};
+		vec2 dest = {
+			target->x,
+			target->y
+		};
+		vec2 direction;
+		glm_vec2_sub(dest, source, direction);
+		glm_vec2_normalize(direction);
+		vec2 result;
+		glm_vec2_scale(direction, get_enemy_by_id(enemy->id)->move_speed, result);
+
+		rodeo_log(
+			rodeo_logLevel_info,
+			"%f, %f\n",
+			result[0],
+			result[1]
+		);
+
+		enemy->dx = result[0];
+		enemy->dy = result[1];
 	}
-	
-	
 }

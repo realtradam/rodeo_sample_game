@@ -3,10 +3,33 @@
 #include "rodeo.h"
 
 typedef
+enum
+{
+	enemy_ai_nothing,
+	enemy_ai_follow,
+	//enemy_ai_runaway,
+}
+enemy_ai_behavior;
+
+typedef
+enum
+{
+	enemy_weapon_basic,
+	//enemy_weapon_fourplus,
+	//enemy_weapon_fourcross,
+}
+enemy_weapon_type;
+
+typedef
 struct
 {
     float hp;
     world_id id;
+	enemy_ai_behavior behavior;
+	float move_speed;
+	enemy_weapon_type weapon;
+	float firerate;
+
 } enemy_t;
 
 #define i_val enemy_t
