@@ -215,13 +215,6 @@ main_loop(void)
 			" fps: %.2f ",
 			time_var
 		);
-
-		rodeo_debug_text_draw(
-			2,
-			4,
-			" orc count: %"PRIu32" ",
-			num_of_units
-		);
 	}
 }
 

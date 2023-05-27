@@ -110,6 +110,7 @@ damage_enemy_resolver(
 {
 	rodeo_collision_2d_world_item_destroy(bullet_collision);
 	enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
+	if(enemy == NULL) { return; }
 	enemy->hp -= 10;
 	if (enemy->hp <= 0) {
 		enemy_destroy(enemy);
