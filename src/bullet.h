@@ -47,3 +47,11 @@ get_enemy_bullet_world(void);
 
 rodeo_collision_2d_world_t *
 get_player_bullet_world(void);
+
+void
+bullet_destroy(
+	cvec_bullet_t_value* bullet
+);
+
+void
+detect_bullet_wall_collisions(void);

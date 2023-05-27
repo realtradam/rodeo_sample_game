@@ -198,6 +198,7 @@ main_loop(void)
 	   draw_player();
 	   draw_enemies();
 	   detect_bullet_enemy_collisions();
+	   detect_bullet_wall_collisions();
 	   detect_player_enemy_collisions();
 	   detect_player_wall_collisions();
 

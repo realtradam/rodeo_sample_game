@@ -2,6 +2,7 @@
 #include "bullet.h"
 #include "cglm/vec2.h"
 #include "player.h"
+#include "bullet.h"
 
 static rodeo_collision_2d_world_t collision_enemies_world = {0};
 static rodeo_texture_2d_t enemy_texture;
@@ -202,6 +203,8 @@ damage_enemy_resolver(
 )
 {
 	rodeo_collision_2d_world_item_destroy(bullet_collision);
+	bullet_t *bullet = get_bullet_by_id(bullet_collision->id);
+	bullet_destroy(bullet);
 	enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
 	if(enemy == NULL) { return; }
 	enemy->hp -= 10;

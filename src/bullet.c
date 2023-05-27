@@ -2,6 +2,7 @@
 #include "input.h"
 #include "player.h"
 #include "bullet.h"
+#include "wall.h"
 #include "rodeo/collision.h"
 
 static rodeo_texture_2d_t bullet_texture;
@@ -137,4 +138,30 @@ rodeo_collision_2d_world_t *
 get_player_bullet_world(void)
 {
 	return &player_bullet_collision_world;
+}
+
+void
+bullet_destroy(
+	cvec_bullet_t_value* bullet
+)
+{
+	rodeo_collision_2d_world_item_destroy_by_id(bullet->id);
+	*bullet = *cvec_bullet_t_back(&bullets);
+    cvec_bullet_t_pop(&bullets);
+}
+
+void bullet_wall_resolver(
+	rodeo_collision_2d_world_item_t *bullet_collision,
+	rodeo_collision_2d_world_item_t *wall_collision
+)
+{
+	bullet_t *bullet= get_bullet_by_id(bullet_collision->id);
+	if (bullet == NULL) { return; }
+	bullet_destroy(bullet);
+}
+
+void
+detect_bullet_wall_collisions(void)
+{
+	rodeo_collision_2d_world_compare_other(&player_bullet_collision_world, get_wall_world(), bullet_wall_resolver);
 }
