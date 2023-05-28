@@ -6,18 +6,26 @@
 #include "bullet.h"
 #include "sprite.h"
 #include "wall.h"
+#include "cglm/vec2.h"
 
 struct player_t
 {
 	sprite_t sprite;
 	rodeo_texture_2d_t texture;
+	rodeo_texture_2d_t shadow_texture;
 	rodeo_texture_2d_t aim_texture;
 	int32_t hp;
 	float damage_timer; //ms
 	world_id collision_id;
 	move_state_t move_state;
+	struct player_weapon
+	{
+		float firerate;
+		float cooldown;
+		float spread;
+	} weapon;
 }
-player;
+player = { 0 };
 
 typedef struct player_t player_t;
 
@@ -34,6 +42,7 @@ void
 init_player(void)
 {
 	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
+	player.shadow_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/blobshadow.png"));
 	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
 	player.sprite.config.texture = &player.texture;
 	player_collision_world = rodeo_collision_2d_world_create();
@@ -56,6 +65,9 @@ init_player(void)
 	}
 	};
 	player.hp = 100;
+	player.weapon.cooldown = 0;
+	player.weapon.firerate = 0.1f;
+	player.weapon.spread = 0.425f;
 	aim_position.x = 101;
 	aim_position.y = 100;
 }
@@ -71,8 +83,23 @@ void
 draw_player(void)
 {
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	draw_aim(player_position->x, player_position->y, 0.25f);
-	draw_sprite(&player.sprite, player_position->x, player_position->y, 0.25f);
+	const float scale = 0.25f;
+	draw_aim(aim_position.x, aim_position.y, scale);
+	rodeo_texture_2d_draw(
+		&(rodeo_rectangle_t){
+			.x = player_position->x,// - ((float)sprite->config.width * scale / 2),
+			.y = player_position->y + (96 * scale),// - ((float)sprite->config.height * scale / 2),
+			.width = 128 * scale,
+			.height = (13.0f / 30.0f * 128.0f) * scale,
+		},
+		&(rodeo_rectangle_t){ 
+			.width = 30,
+			.height = 13
+		},
+		&(rodeo_color_RGBAFloat_t){ .array = { 1.0f, 1.0f, 1.0f, 1.0f } },
+		&player.shadow_texture
+	);
+	draw_sprite(&player.sprite, player_position->x, player_position->y, scale);
 	/*
 	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
 	   rodeo_texture_2d_draw(
@@ -146,20 +173,55 @@ move_player(void)
 void
 player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 {
-	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	const uint32_t bullet_per_frame = 10;
-	for(uint32_t i = 0; i < bullet_per_frame; ++i)
+
+	if(player.weapon.cooldown > 0)
 	{
+		player.weapon.cooldown -= rodeo_frame_time_get() / 1000;
+	}
+	if(player.move_state == mv_state_mid_air)
+	{
+	while(player.weapon.cooldown <= 0)
+	{
+		player.weapon.cooldown += player.weapon.firerate;
+		cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+
+		vec2 direction_vec;
+
+		glm_vec2_sub(
+				(vec2){aim_position.x, aim_position.y},
+				(vec2){player_position->x, player_position->y},
+				direction_vec
+				);
+		glm_vec2_normalize(direction_vec);
+
+		//for(uint32_t i = 0; i < bullet_per_frame; ++i)
+		//{
+		vec2 result_vec;
+		glm_vec2_copy(direction_vec, result_vec);
+
+		vec2 rand = {
+			((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * player.weapon.spread, 
+			((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * player.weapon.spread, 
+		};
+
+		result_vec[0] += rand[0];
+		result_vec[1] += rand[1];
+		glm_vec2_normalize(result_vec);
+		glm_vec2_scale(result_vec, 5.0f, result_vec);
+
 		spawn_bullet(
 				(float)player_position->x + (orc_size[0] / 2.0f) - 9.0f,
 				(float)player_position->y + (orc_size[1] / 2.0f) - 16.0f,
-				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
-				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+				(float)(result_vec[0]),
+				(float)(result_vec[1]),
+				//(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
+				//(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
 				bullet_collision_world,
 				(rodeo_color_RGBAFloat_t){ .array = { 1,1,1,1 } }
 				);
 	}
-}
+	}
+	}
 
 void player_enemy_resolver(
 	rodeo_collision_2d_world_item_t *player_collision,
@@ -251,7 +313,21 @@ get_player_position(void)
 void
 update_aim_position(void)
 {
-
+	cvec_collision_2d_world_item_value *player_position = get_player_position();
+	vec2 player_position_vec = { player_position->x, player_position->y };
+	vec2 aim_position_vec = { aim_position.x, aim_position.y };
+	float distance = glm_vec2_distance2(player_position_vec, aim_position_vec);
+	// move towards player
+	if(distance > (25.0f * 25.0f))
+	{
+		vec2 direction_vec;
+		glm_vec2_sub(player_position_vec, aim_position_vec, direction_vec);
+		glm_vec2_normalize(direction_vec);
+		glm_vec2_scale(direction_vec, -25.0f, direction_vec);
+		glm_vec2_add(player_position_vec, direction_vec, direction_vec);
+		aim_position.x = direction_vec[0];
+		aim_position.y = direction_vec[1];
+	}
 }
 
 void

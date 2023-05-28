@@ -135,10 +135,10 @@ main_loop(void)
 			rodeo_audio_music_stop_fadeOut(1000);
 		}
 
-		if(*(bool*)summon_units_input(NULL, NULL)) 
-		{
-			player_shoot(get_player_bullet_world());
-		}
+		//if(*(bool*)summon_units_input(NULL, NULL)) 
+		//{
+		player_shoot(get_player_bullet_world());
+		//}
 
 		rodeo_rectangle_draw(
 			&(rodeo_rectangle_t){ 100, 100, 50, 50 },
