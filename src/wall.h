@@ -22,3 +22,6 @@ coords_inside_wall(
     float x,
     float y
 );
+
+void
+draw_level(void);

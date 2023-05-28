@@ -51,6 +51,7 @@ main_loop(void)
 		move_bullets();
 		move_enemies();
 		group_follow_target(get_player_position());
+		draw_level();
 		draw_bullets();
 		draw_player();
 		draw_enemies();
@@ -101,6 +102,8 @@ main(void)
 		rodeo_logLevel_error,
 		"Testing error log level... It seems to work!"
 	);
+
+
 	mrodeo_window_do(window_height, window_width, cstr_lit("Rodeo Window"))
 	{
 		renderer = rodeo_renderer_name_get();
@@ -113,10 +116,7 @@ main(void)
 		init_player();
 		init_enemies();
 		init_wall();
-		new_wall(0, -10, window_width, 10);
-		new_wall(0, window_height, window_width, 10);
-		new_wall(-10, 0, 10, window_height);
-		new_wall(window_width, 0, 10, window_height);
+
 
 		rodeo_mainLoop_run(
 			main_loop
