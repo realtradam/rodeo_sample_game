@@ -4,12 +4,16 @@
 static rodeo_collision_2d_world_t collision_wall_world;
 rodeo_texture_2d_t wall_texture;
 rodeo_texture_2d_t floor_texture;
+rodeo_texture_2d_t goat_texture;
+rodeo_texture_2d_t logo_texture;
 
 void
 init_wall(void)
 {
 	wall_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/walls.png"));
 	floor_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/floor.png"));
+	goat_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/goat_on_a_pole.png"));
+	logo_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/tojam2023_tagline_header_clear.png"));
 	uint16_t window_width = 1600;
 	uint16_t window_height = 900;
 	collision_wall_world = rodeo_collision_2d_world_create();
@@ -136,7 +140,13 @@ void
 draw_level(void)
 {
 	rodeo_rectangle_t rect = (rodeo_rectangle_t){0,0,1600,900};
+	rodeo_rectangle_t logo_size = (rodeo_rectangle_t){0,0,1024,400};
+	rodeo_rectangle_t logo_dest = (rodeo_rectangle_t){1600-(1024*0.25f),10,1024*0.25f,400*0.25f};
+	rodeo_rectangle_t goat_size = (rodeo_rectangle_t){0,0,529,1038};
+	rodeo_rectangle_t goat_dest = (rodeo_rectangle_t){(1600.0f/2)-(529/2*0.07f),(900.0f/2)-(1038/2*0.07f),529*0.07f,1038*0.07f};
 	rodeo_texture_2d_draw(&rect, &rect, &(rodeo_color_RGBAFloat_t){ .array = {0.96f, 0.41f, 0.1f, 1.0f} }, &wall_texture);
 	rodeo_texture_2d_draw(&rect, &rect, &(rodeo_color_RGBAFloat_t){ .array = {0.52f, 0.31f, 0.73f, 0.33f} }, &floor_texture);
+	rodeo_texture_2d_draw(&goat_dest, &goat_size, &(rodeo_color_RGBAFloat_t){ .array = {1,1,1,1} }, &goat_texture);
+	rodeo_texture_2d_draw(&logo_dest, &logo_size, &(rodeo_color_RGBAFloat_t){ .array = {1,1,1,1} }, &logo_texture);
 
 }
