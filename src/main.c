@@ -55,11 +55,14 @@ main_loop(void)
 		draw_bullets();
 		draw_player();
 		draw_enemies();
+		draw_hp_bar();
 		detect_bullet_enemy_collisions();
 		detect_bullet_wall_collisions();
 		detect_player_enemy_collisions();
 		detect_player_wall_collisions();
+		detect_enemy_wall_collisions();
 
+		/*
 		rodeo_debug_text_draw(
 			1,
 			1,
@@ -82,6 +85,7 @@ main_loop(void)
 			" fps: %.2f ",
 			time_var
 		);
+		*/
 	}
 }
 

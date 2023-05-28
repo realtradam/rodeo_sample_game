@@ -86,6 +86,53 @@ coords_inside_wall(
 }
 
 void
+moving_wall_resolver(
+	rodeo_collision_2d_world_item_t *obj_collision,
+	rodeo_collision_2d_world_item_t *wall_collision
+)
+{
+	rodeo_collision_2d_world_item_t *p = obj_collision;
+	rodeo_collision_2d_world_item_t *w = wall_collision;
+	rodeo_rectangle_t step = (rodeo_rectangle_t){
+		.x = p->x + p->dx * rodeo_frame_time_get(),
+		.y = p->y + p->dy * rodeo_frame_time_get(),
+		.width = p->width,
+		.height = p->height
+	};
+	rodeo_rectangle_t intersection = rodeo_collision_2d_get_collision_rect(p, w);
+	if (intersection.width < intersection.height) {
+		if (intersection.x == step.x) {
+			p->x = w->x + w->width;
+			if (p->dx < 0) {
+				p->dx = 0;
+			}
+		} else {
+			p->x = w->x - p->width;
+			if (p->dx > 0) {
+				p->dx = 0;
+			}
+		}
+	}
+	else if (intersection.height < intersection.width) {
+		if (intersection.y == step.y) {
+			p->y = w->y + w->height;
+			if (p->dy < 0) {
+				p->dy = 0;
+			}
+		} else {
+			p->y = w->y - p->height;
+			if (p->dy > 0) {
+				p->dy = 0;
+			}
+		}
+	}
+	else if (p->width == w->width && p->height == w->height) {
+		p->dx = 0;
+		p->dy = 0;
+	}
+}
+
+void
 draw_level(void)
 {
 	rodeo_rectangle_t rect = (rodeo_rectangle_t){0,0,1600,900};

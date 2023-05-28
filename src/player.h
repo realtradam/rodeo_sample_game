@@ -32,6 +32,9 @@ void
 draw_player(void);
 
 void
+draw_hp_bar(void);
+
+void
 move_player(void);
 
 void

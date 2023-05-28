@@ -24,4 +24,10 @@ coords_inside_wall(
 );
 
 void
+moving_wall_resolver(
+	rodeo_collision_2d_world_item_t *obj_collision,
+	rodeo_collision_2d_world_item_t *wall_collision
+);
+
+void
 draw_level(void);

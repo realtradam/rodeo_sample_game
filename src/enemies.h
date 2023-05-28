@@ -14,10 +14,9 @@ enemy_ai_behavior;
 typedef
 enum
 {
-	enemy_weapon_none,
+	enemy_weapon_fourcross,
 	enemy_weapon_basic,
-	//enemy_weapon_fourplus,
-	//enemy_weapon_fourcross,
+	enemy_weapon_none,
 }
 enemy_weapon_type;
 
@@ -70,6 +69,9 @@ get_enemy_by_id(
 rodeo_collision_2d_world_t *
 get_enemies_world(void);
 
+rodeo_collision_2d_world_t *
+get_ghosts_world(void);
+
 cvec_enemy_t
 get_enemies_cvec(void);
 
@@ -92,3 +94,6 @@ enemy_t*
 attempt_random_enemy_spawn(
 	rodeo_rectangle_t bounds
 );
+
+void
+detect_enemy_wall_collisions(void);

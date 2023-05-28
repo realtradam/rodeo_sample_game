@@ -7,6 +7,7 @@
 #include "sprite.h"
 #include "wall.h"
 #include "cglm/vec2.h"
+#include "wall.h"
 
 struct player_t
 {
@@ -14,6 +15,7 @@ struct player_t
 	rodeo_texture_2d_t texture;
 	rodeo_texture_2d_t shadow_texture;
 	rodeo_texture_2d_t aim_texture;
+	rodeo_texture_2d_t heart_texture;
 	int32_t hp;
 	float damage_timer; //ms
 	float damage_cooldown_rate;
@@ -47,6 +49,7 @@ init_player(void)
 	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
 	player.shadow_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/blobshadow.png"));
 	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
+	player.heart_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
 	player.sprite.config.texture = &player.texture;
 	player_collision_world = rodeo_collision_2d_world_create();
 	player.collision_id = rodeo_collision_2d_world_item_create(
@@ -110,6 +113,25 @@ draw_player(void)
 		&player.shadow_texture
 	);
 	draw_sprite(&player.sprite, player_position->x, player_position->y, scale, (rodeo_color_RGBAFloat_t){ .array = {1,1,1,transparency} });
+}
+
+void
+draw_hp_bar(void)
+{
+	for(int i = 0; i < (player.hp / 10); ++i)
+	{
+		/*
+		rodeo_log(
+				rodeo_logLevel_info,
+				"%f\n",
+				10.0f + (40.0f * (float)i)
+				);*/
+		rodeo_texture_2d_draw(
+				&(rodeo_rectangle_t){ .x = 10.0f + (40.0f * (float)i), .y = 10, .width = 35, .height = 35 },
+				&(rodeo_rectangle_t){ .x = 0, .y = 0, .width = 35, .height = 35 },
+				NULL,
+				&player.heart_texture);
+	}
 }
 
 void
@@ -236,6 +258,32 @@ void player_enemy_resolver(
 		);
 		player.hp -= 10;
 		player.damage_timer = 0;
+		enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
+		enemy_destroy(enemy);
+	}
+
+}
+
+void player_bullet_resolver(
+	rodeo_collision_2d_world_item_t *player_collision,
+	rodeo_collision_2d_world_item_t *bullet_collision
+)
+{
+	if (player.hp <= 0) {
+		/*rodeo_log(
+			rodeo_logLevel_info,
+			"player is dead"
+		);*/
+	} else if (player.damage_timer >= player.damage_cooldown_rate) {
+		rodeo_log(
+			rodeo_logLevel_info,
+			"player health is now %d",
+			player.hp
+		);
+		player.hp -= 10;
+		player.damage_timer = 0;
+		bullet_t *bullet = get_bullet_by_id(bullet_collision->id);
+		bullet_destroy(bullet);
 	}
 
 }
@@ -245,58 +293,13 @@ detect_player_enemy_collisions(void)
 {
 	player.damage_timer += rodeo_frame_time_get();
 	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemies_world(), player_enemy_resolver);
-}
-
-void player_wall_resolver(
-	rodeo_collision_2d_world_item_t *player_collision,
-	rodeo_collision_2d_world_item_t *wall_collision
-)
-{
-	rodeo_collision_2d_world_item_t *p = player_collision;
-	rodeo_collision_2d_world_item_t *w = wall_collision;
-	rodeo_rectangle_t step = (rodeo_rectangle_t){
-		.x = p->x + p->dx * rodeo_frame_time_get(),
-		.y = p->y + p->dy * rodeo_frame_time_get(),
-		.width = p->width,
-		.height = p->height
-	};
-	rodeo_rectangle_t intersection = rodeo_collision_2d_get_collision_rect(p, w);
-	if (intersection.width < intersection.height) {
-		if (intersection.x == step.x) {
-			p->x = w->x + w->width;
-			if (p->dx < 0) {
-				p->dx = 0;
-			}
-		} else {
-			p->x = w->x - p->width;
-			if (p->dx > 0) {
-				p->dx = 0;
-			}
-		}
-	}
-	else if (intersection.height < intersection.width) {
-		if (intersection.y == step.y) {
-			p->y = w->y + w->height;
-			if (p->dy < 0) {
-				p->dy = 0;
-			}
-		} else {
-			p->y = w->y - p->height;
-			if (p->dy > 0) {
-				p->dy = 0;
-			}
-		}
-	}
-	else if (p->width == w->width && p->height == w->height) {
-		p->dx = 0;
-		p->dy = 0;
-	}
+	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemy_bullet_world(), player_bullet_resolver);
 }
 
 void
 detect_player_wall_collisions(void)
 {
-	rodeo_collision_2d_world_compare_other(&player_collision_world, get_wall_world(), player_wall_resolver);
+	rodeo_collision_2d_world_compare_other(&player_collision_world, get_wall_world(), moving_wall_resolver);
 }
 
 cvec_collision_2d_world_item_value *
@@ -344,3 +347,4 @@ draw_aim(float player_x, float player_y, float scale)
 			&player.aim_texture
 		);
 }
+
