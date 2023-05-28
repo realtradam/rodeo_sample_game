@@ -55,8 +55,8 @@ init_player(void)
 	player.collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
 		(rodeo_collision_2d_world_item_t){
-			.x = 100,
-			.y = 100,
+			.x = 1600/3,
+			.y = 900/3,
 			.width = orc_size[0],
 			.height = orc_size[1]
 		}
@@ -282,9 +282,9 @@ void player_bullet_resolver(
 		);
 		player.hp -= 10;
 		player.damage_timer = 0;
-		bullet_t *bullet = get_bullet_by_id(bullet_collision->id);
-		bullet_destroy(bullet);
 	}
+	bullet_t *bullet = get_bullet_by_id(bullet_collision->id);
+	bullet_destroy(bullet);
 
 }
 

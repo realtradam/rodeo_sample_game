@@ -52,7 +52,7 @@ spawn_enemy(float x, float y)
 	return cvec_enemy_t_push(
 		enemy_collision_world,
 		(enemy_t){
-			.hp = 50.0,
+			.hp = 20.0,
 			.move_speed = ((float)(rng % 3) + 1.0f) * 0.3f,
 			.behavior = enemy_ai_follow,
 			.weapon = {
@@ -498,7 +498,7 @@ attempt_random_enemy_spawn(
 {
 	spawn_cooldown -= rodeo_frame_time_get();
 	if (spawn_cooldown <= 0) {
-		spawn_cooldown += (float)rodeo_random_double_get() * 500.0f + 150.0f;
+		spawn_cooldown += (float)rodeo_random_double_get() * 1500.0f + 450.0f;
 		return random_enemy_create(bounds);
 	}
 	return NULL;

@@ -136,7 +136,7 @@ void
 draw_level(void)
 {
 	rodeo_rectangle_t rect = (rodeo_rectangle_t){0,0,1600,900};
-	rodeo_texture_2d_draw(&rect, &rect, NULL, &wall_texture);
-	rodeo_texture_2d_draw(&rect, &rect, NULL, &floor_texture);
+	rodeo_texture_2d_draw(&rect, &rect, &(rodeo_color_RGBAFloat_t){ .array = {0.96f, 0.41f, 0.1f, 1.0f} }, &wall_texture);
+	rodeo_texture_2d_draw(&rect, &rect, &(rodeo_color_RGBAFloat_t){ .array = {0.52f, 0.31f, 0.73f, 0.33f} }, &floor_texture);
 
 }
