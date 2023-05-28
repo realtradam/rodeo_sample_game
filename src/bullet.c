@@ -6,6 +6,7 @@
 #include "rodeo/collision.h"
 
 static rodeo_texture_2d_t bullet_texture;
+static rodeo_audio_sound_t *pop_sound;
 //static rodeo_collision_2d_world_t bullet_collision_world;
 static rodeo_collision_2d_world_t player_bullet_collision_world = {0};
 static rodeo_collision_2d_world_t enemy_bullet_collision_world = {0};
@@ -15,12 +16,14 @@ void
 init_bullets(void)
 {
 	bullet_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
+	pop_sound = rodeo_audio_sound_create_from_path(cstr_lit("assets/pop.wav"));
 }
 
 void
 deinit_bullets(void)
 {
 	rodeo_texture_2d_destroy(&bullet_texture);
+	rodeo_audio_sound_destroy(pop_sound);
 }
 
 bullet_t *
@@ -148,6 +151,7 @@ bullet_destroy(
 	rodeo_collision_2d_world_item_destroy_by_id(bullet->id);
 	*bullet = *cvec_bullet_t_back(&bullets);
     cvec_bullet_t_pop(&bullets);
+	rodeo_audio_sound_play(pop_sound);
 }
 
 void bullet_wall_resolver(

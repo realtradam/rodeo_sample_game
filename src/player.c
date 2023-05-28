@@ -29,6 +29,7 @@ struct player_t
 player = { 0 };
 
 typedef struct player_t player_t;
+static rodeo_audio_sound_t *bubbles_sound;
 
 // 0-19 jumping
 // 61 standing
@@ -42,6 +43,7 @@ static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
 void
 init_player(void)
 {
+	bubbles_sound = rodeo_audio_sound_create_from_path(cstr_lit("assets/blowing_bubbles.wav"));
 	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
 	player.shadow_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/blobshadow.png"));
 	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
@@ -79,6 +81,7 @@ deinit_player(void)
 {
 	rodeo_texture_2d_destroy(&player.texture);
 	rodeo_collision_2d_world_destroy(&player_collision_world);
+	rodeo_audio_sound_destroy(bubbles_sound);
 }
 
 void
@@ -149,6 +152,10 @@ move_player(void)
 	if(player.sprite.iter == 60)
 	{
 		player.move_state = mv_state_standing;
+	}
+	if(player.sprite.iter == 1)
+	{
+		rodeo_audio_sound_play(bubbles_sound);
 	}
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 	player_position->x += player_position->dx * ((60.0f - (float)player.sprite.iter) / 60.0f);
