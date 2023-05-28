@@ -262,10 +262,15 @@ random_enemy_create(
 )
 {
 	float spawn_coords[2];
+	cvec_collision_2d_world_item_value* p = get_player_position();
+	float player_coords[2] = {p->x, p->y};
+	float player_radius = p->height * 2 + 100;
 	for (int i = 0; i < 100; ++i) {
 		spawn_coords[0] = (float)rodeo_random_double_get() * bounds.width + bounds.x;
 		spawn_coords[1] = (float)rodeo_random_double_get() * bounds.height + bounds.y;
-		if (!coords_inside_wall(spawn_coords[0], spawn_coords[1])) {
+		float dist = glm_vec2_distance(spawn_coords, player_coords);
+		if (!coords_inside_wall(spawn_coords[0], spawn_coords[1]) &&
+				dist > player_radius) {
 			return spawn_enemy(spawn_coords[0], spawn_coords[1]);
 		}
 	}
