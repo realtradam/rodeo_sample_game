@@ -3,7 +3,7 @@
 #include "sprite.h"
 
 void
-draw_sprite(sprite_t *sprite, float x, float y, float scale)
+draw_sprite(sprite_t *sprite, float x, float y, float scale, rodeo_color_RGBAFloat_t color)
 {
 	rodeo_texture_2d_draw(
 		&(rodeo_rectangle_t){
@@ -18,7 +18,7 @@ draw_sprite(sprite_t *sprite, float x, float y, float scale)
 			.width = (float)sprite->config.width,
 			.height = (float)sprite->config.height
 		},
-		&(rodeo_color_RGBAFloat_t){ .array = { 1.0f, 1.0f, 1.0f, 1.0f } },
+		&color,
 		sprite->config.texture
 	);
 }

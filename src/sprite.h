@@ -17,5 +17,5 @@ struct
 sprite_t;
 
 void
-draw_sprite(sprite_t *sprite, float x, float y, float scale);
+draw_sprite(sprite_t *sprite, float x, float y, float scale, rodeo_color_RGBAFloat_t color);
 

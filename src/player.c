@@ -16,6 +16,7 @@ struct player_t
 	rodeo_texture_2d_t aim_texture;
 	int32_t hp;
 	float damage_timer; //ms
+	float damage_cooldown_rate;
 	world_id collision_id;
 	move_state_t move_state;
 	struct player_weapon
@@ -70,6 +71,7 @@ init_player(void)
 	player.weapon.spread = 0.425f;
 	aim_position.x = 101;
 	aim_position.y = 100;
+	player.damage_cooldown_rate = 1000.0f;
 }
 
 void
@@ -82,6 +84,11 @@ deinit_player(void)
 void
 draw_player(void)
 {
+	float transparency = 1.0f;
+	if(!(player.damage_timer >= player.damage_cooldown_rate || (rodeo_frame_count_get() % 8 < 4)))
+	{
+		transparency = 0.33f;
+	}
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 	const float scale = 0.25f;
 	draw_aim(aim_position.x, aim_position.y, scale);
@@ -99,26 +106,7 @@ draw_player(void)
 		&(rodeo_color_RGBAFloat_t){ .array = { 1.0f, 1.0f, 1.0f, 1.0f } },
 		&player.shadow_texture
 	);
-	draw_sprite(&player.sprite, player_position->x, player_position->y, scale);
-	/*
-	cvec_collision_2d_world_item_value *player = rodeo_collision_2d_world_item_get_by_id(player_collision_id);
-	   rodeo_texture_2d_draw(
-			&(rodeo_rectangle_t){
-				.x = (float)(int32_t)player->x - (orc_size[0] / 2.0f),
-				.y = (float)(int32_t)player->y - (orc_size[1] / 2.0f) ,
-				.width = orc_size[0],
-				.height = orc_size[1],
-			},
-			&(rodeo_rectangle_t){
-				.x = 5,
-				.y = 5,
-				.width = 13,
-				.height = 19
-			},
-			NULL,
-			&player_texture
-		);
-	*/
+	draw_sprite(&player.sprite, player_position->x, player_position->y, scale, (rodeo_color_RGBAFloat_t){ .array = {1,1,1,transparency} });
 }
 
 void
@@ -233,7 +221,7 @@ void player_enemy_resolver(
 			rodeo_logLevel_info,
 			"player is dead"
 		);*/
-	} else if (player.damage_timer > 1000.0) {
+	} else if (player.damage_timer >= player.damage_cooldown_rate) {
 		rodeo_log(
 			rodeo_logLevel_info,
 			"player health is now %d",
