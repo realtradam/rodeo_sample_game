@@ -166,3 +166,4 @@ detect_bullet_wall_collisions(void)
 	rodeo_collision_2d_world_compare_other(&player_bullet_collision_world, get_wall_world(), bullet_wall_resolver);
 	rodeo_collision_2d_world_compare_other(&enemy_bullet_collision_world, get_wall_world(), bullet_wall_resolver);
 }
+

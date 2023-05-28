@@ -6,8 +6,12 @@
 #include "wall.h"
 
 static rodeo_collision_2d_world_t collision_enemies_world = {0};
-static rodeo_texture_2d_t enemy_texture;
+static rodeo_collision_2d_world_t collision_ghosts_world = {0};
+static rodeo_texture_2d_t hinotamatchi_texture;
+static rodeo_texture_2d_t amonghost_texture;
+static rodeo_texture_2d_t squid_texture;
 static cvec_enemy_t enemies = {0};
+static cvec_enemy_t ghosts = {0};
 static float spawn_cooldown = 0;
 
 void
@@ -15,31 +19,45 @@ init_enemies(void)
 {
 	//collision_enemies_world = rodeo_collision_2d_world_create();
 	//enemies = cvec_enemy_t_init();
-	enemy_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/enemy.png"));
+	squid_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/squid.png"));
+	hinotamatchi_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/hinotamatchi.png"));
+	amonghost_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/amonghost.png"));
 }
 
 void
 deinit_enemies(void)
 {
 	rodeo_collision_2d_world_destroy(&collision_enemies_world);
+	rodeo_collision_2d_world_destroy(&collision_ghosts_world);
 	cvec_enemy_t_drop(&enemies);
-	rodeo_texture_2d_destroy(&enemy_texture);
+	rodeo_texture_2d_destroy(&hinotamatchi_texture);
+	rodeo_texture_2d_destroy(&squid_texture);
+	rodeo_texture_2d_destroy(&amonghost_texture);
 }
 
 enemy_t*
 spawn_enemy(float x, float y)
 {
-	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 26, .height = 38};
+	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
 	world_id id = rodeo_collision_2d_world_item_create(&collision_enemies_world, enemy_collision)->id;
+	uint64_t rng = rodeo_random_uint64_get();
+
+	cvec_enemy_t *enemy_collision_world = &enemies;
+
+	if(rng % 3 == enemy_weapon_basic)
+	{
+		enemy_collision_world = &ghosts;
+	}
+
 	return cvec_enemy_t_push(
-		&enemies,
+		enemy_collision_world,
 		(enemy_t){
-			.hp = 100.0,
-			.move_speed = 1.0f,
+			.hp = 50.0,
+			.move_speed = ((float)(rng % 3) + 1.0f) * 0.3f,
 			.behavior = enemy_ai_follow,
 			.weapon = {
-			.firerate = 1.0f,
-			.type = enemy_weapon_basic,
+			.firerate = -((rng % 3) - 2.0f) * 1.6f,
+			.type = rng % 3,
 			.cooldown = 0,
 			},
 			.id = id
@@ -47,10 +65,41 @@ spawn_enemy(float x, float y)
 }
 
 void
-draw_enemies(void)
+draw_enemy(cvec_collision_2d_world_item_value *enemy)
 {
-	c_foreach(i, cvec_collision_2d_world_item, collision_enemies_world) {
-		cvec_collision_2d_world_item_value *enemy = i.ref;
+		rodeo_texture_2d_t *texture;
+		rodeo_color_RGBAFloat_t color;
+
+		enemy_t *enemy_obj = get_enemy_by_id(enemy->id);
+
+		switch(enemy_obj->weapon.type)
+		{
+			case enemy_weapon_none:
+				{
+					texture = &hinotamatchi_texture;
+					color = (rodeo_color_RGBAFloat_t){
+						.array = { 0.8f, 0.5f, 0.1f, 1.0f  }
+					};
+				}
+				break;
+			case enemy_weapon_basic:
+				{
+					texture = &amonghost_texture;
+					color = (rodeo_color_RGBAFloat_t){
+						.array = { 0.25f, 0.95f, 0.25f, 0.6f  }
+					};
+				}
+				break;
+			case enemy_weapon_fourcross:
+				{
+					texture = &squid_texture;
+					color = (rodeo_color_RGBAFloat_t){
+						.array = { 0.1f, 0.2f, 0.75f, 1.0f  }
+					};
+				}
+				break;
+		}
+
 		
 		   rodeo_texture_2d_draw(
 				&(rodeo_rectangle_t){
@@ -62,12 +111,23 @@ draw_enemies(void)
 				&(rodeo_rectangle_t){
 					.x = 0,
 					.y = 0,
-					.width = 26,
-					.height = 38
+					.width = 40,
+					.height = 40
 				},
-				NULL,
-				&enemy_texture
+				&color,
+				texture
 				);
+
+}
+
+void
+draw_enemies(void)
+{
+	c_foreach(i, cvec_collision_2d_world_item, collision_enemies_world) {
+		draw_enemy(i.ref);
+	}
+	c_foreach(i, cvec_collision_2d_world_item, collision_ghosts_world) {
+		draw_enemy(i.ref);
 	}
 }
 
@@ -103,7 +163,15 @@ move_enemies(void)
 {	
   
    rodeo_collision_2d_world_compare_self(get_enemies_world(), enemy_overlap_resolver);
+   rodeo_collision_2d_world_compare_self(get_ghosts_world(), enemy_overlap_resolver);
 	c_foreach(i, cvec_enemy_t, enemies) {
+		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		enemy->x += enemy->dx;
+		enemy->dx = 0;
+		enemy->y += enemy->dy;
+		enemy->dy = 0;
+	}
+	c_foreach(i, cvec_enemy_t, ghosts) {
 		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
 		enemy->x += enemy->dx;
 		enemy->dx = 0;
@@ -115,7 +183,10 @@ move_enemies(void)
 void
 enemies_attempt_weapon_fire(void)
 {
-	c_foreach(i, cvec_enemy_t, enemies) {
+	cvec_enemy_t enemy_arry[2] = { enemies, ghosts };
+	for(int32_t j = 0; j < 2; ++j)
+	{
+	c_foreach(i, cvec_enemy_t, enemy_arry[j]) {
 		switch(i.ref->weapon.type)
 		{
 			case enemy_weapon_none:
@@ -138,7 +209,18 @@ enemies_attempt_weapon_fire(void)
 							dest
 						);
 						glm_vec2_normalize(dest);
+
+						vec2 rand1 = {
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.250f, 
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.250f, 
+						};
+
+						glm_vec2_add(dest, rand1, dest);
+
+						glm_vec2_normalize(dest);
+
 						glm_vec2_scale(dest, 1.0, dest);
+
 						spawn_bullet(
 							enemy->x,
 							enemy->y,
@@ -159,7 +241,122 @@ enemies_attempt_weapon_fire(void)
 					}
 				}
 				break;
+			case enemy_weapon_fourcross:
+				{
+					if(i.ref->weapon.cooldown < 0)
+					{
+						i.ref->weapon.cooldown += i.ref->weapon.firerate;
+						//weapon spawn logic
+						cvec_collision_2d_world_item_value *player = get_player_position();
+						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+						vec2 dest;
+						glm_vec2_sub(
+							(vec2){ player->x, player->y },
+							(vec2){ enemy->x, enemy->y },
+							dest
+						);
+						glm_vec2_normalize(dest);
+
+						vec2 bullet1;
+						vec2 bullet2;
+						vec2 bullet3;
+						vec2 bullet4;
+
+						glm_vec2_rotate(dest, 3.14159f/4.0f, bullet1);
+						glm_vec2_rotate(bullet1, 3.14159f/2.0f, bullet2);
+						glm_vec2_rotate(bullet2, 3.14159f/2.0f, bullet3);
+						glm_vec2_rotate(bullet3, 3.14159f/2.0f, bullet4);
+
+						vec2 rand1 = {
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+						};
+						vec2 rand2 = {
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+						};
+						vec2 rand3 = {
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+						};
+						vec2 rand4 = {
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+							((((float)rodeo_random_double_get()) - 0.5f) * 2.0f) * 0.0f, 
+						};
+
+						glm_vec2_add(bullet1, rand1, bullet1);
+						glm_vec2_add(bullet2, rand2, bullet2);
+						glm_vec2_add(bullet3, rand3, bullet3);
+						glm_vec2_add(bullet4, rand4, bullet4);
+
+						glm_vec2_normalize(bullet1);
+						glm_vec2_normalize(bullet2);
+						glm_vec2_normalize(bullet3);
+						glm_vec2_normalize(bullet4);
+
+						//glm_vec2_scale(dest, 1.0, dest);
+						
+						spawn_bullet(
+							enemy->x,
+							enemy->y,
+							bullet1[0],
+							bullet1[1],
+							get_enemy_bullet_world(),
+							(rodeo_color_RGBAFloat_t){
+								.colors.alpha = 1,
+								.colors.red = 0.9f,
+								.colors.green = 0.1f,
+								.colors.blue = 0.1f
+							}
+						);
+						spawn_bullet(
+							enemy->x,
+							enemy->y,
+							bullet2[0],
+							bullet2[1],
+							get_enemy_bullet_world(),
+							(rodeo_color_RGBAFloat_t){
+								.colors.alpha = 1,
+								.colors.red = 0.9f,
+								.colors.green = 0.1f,
+								.colors.blue = 0.1f
+							}
+						);
+						spawn_bullet(
+							enemy->x,
+							enemy->y,
+							bullet3[0],
+							bullet3[1],
+							get_enemy_bullet_world(),
+							(rodeo_color_RGBAFloat_t){
+								.colors.alpha = 1,
+								.colors.red = 0.9f,
+								.colors.green = 0.1f,
+								.colors.blue = 0.1f
+							}
+						);
+						spawn_bullet(
+							enemy->x,
+							enemy->y,
+							bullet4[0],
+							bullet4[1],
+							get_enemy_bullet_world(),
+							(rodeo_color_RGBAFloat_t){
+								.colors.alpha = 1,
+								.colors.red = 0.9f,
+								.colors.green = 0.1f,
+								.colors.blue = 0.1f
+							}
+						);
+					}
+					else
+					{
+						i.ref->weapon.cooldown -= rodeo_frame_time_get()/1000.0f;
+					}
+				}
+				break;
 		}
+	}
 	}
 }
 
@@ -173,6 +370,11 @@ get_enemy_by_id(
 			return i.ref;
 		}
 	}
+	c_foreach(i, cvec_enemy_t, ghosts) {
+		if (i.ref->id.id == id.id) {
+			return i.ref;
+		}
+	}
 	return NULL;
 }
 
@@ -180,6 +382,12 @@ rodeo_collision_2d_world_t *
 get_enemies_world(void)
 {
     return &collision_enemies_world;
+}
+
+rodeo_collision_2d_world_t *
+get_ghosts_world(void)
+{
+    return &collision_ghosts_world;
 }
 
 cvec_enemy_t
@@ -217,13 +425,17 @@ damage_enemy_resolver(
 void
 detect_bullet_enemy_collisions(void)
 {
+	rodeo_collision_2d_world_compare_other(&collision_ghosts_world, get_player_bullet_world(), damage_enemy_resolver);
 	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_player_bullet_world(), damage_enemy_resolver);
 }
 
 void
 group_follow_target(rodeo_collision_2d_world_item_t *target)
 {
-	c_foreach(i, cvec_enemy_t, enemies) {
+	cvec_enemy_t enemy_arry[2] = { enemies, ghosts };
+	for(int32_t j = 0; j < 2; ++j)
+	{
+	c_foreach(i, cvec_enemy_t, enemy_arry[j]) {
 		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
 		/*
 		float direction[2] = {
@@ -253,6 +465,7 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 
 		enemy->dx = result[0];
 		enemy->dy = result[1];
+	}
 	}
 }
 
@@ -285,8 +498,14 @@ attempt_random_enemy_spawn(
 {
 	spawn_cooldown -= rodeo_frame_time_get();
 	if (spawn_cooldown <= 0) {
-		spawn_cooldown += (float)rodeo_random_double_get() * 5000.0f + 1500.0f;
+		spawn_cooldown += (float)rodeo_random_double_get() * 500.0f + 150.0f;
 		return random_enemy_create(bounds);
 	}
 	return NULL;
+}
+
+void
+detect_enemy_wall_collisions(void)
+{
+	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_wall_world(), moving_wall_resolver);
 }

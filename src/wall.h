@@ -22,3 +22,9 @@ coords_inside_wall(
     float x,
     float y
 );
+
+void
+moving_wall_resolver(
+	rodeo_collision_2d_world_item_t *obj_collision,
+	rodeo_collision_2d_world_item_t *wall_collision
+);
