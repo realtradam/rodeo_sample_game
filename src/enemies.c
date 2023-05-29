@@ -402,7 +402,10 @@ void enemy_destroy(
 {
 	rodeo_collision_2d_world_item_destroy_by_id(enemy->id);
 	*enemy = *cvec_enemy_t_back(&enemies);
-    cvec_enemy_t_pop(&enemies);
+	if(cvec_enemy_t_size(&enemies) > 0)
+	{
+		cvec_enemy_t_pop(&enemies);
+	}
 
 }
 
