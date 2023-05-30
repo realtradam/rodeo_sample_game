@@ -44,9 +44,9 @@ main_loop(void)
 			rodeo_audio_music_stop_fadeOut(1000);
 		}
 
-		player_shoot(get_player_bullet_world());
-		enemies_attempt_weapon_fire();
-		attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
+		//player_shoot(get_player_bullet_world());
+		//enemies_attempt_weapon_fire();
+		//attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
 
 		move_bullets();
 		move_enemies();
@@ -125,6 +125,7 @@ main(void)
 					{
 						wall_init_do()
 						{
+							spawn_enemy(764.0f+73.0f,500.0f);
 							rodeo_mainLoop_run(
 								main_loop
 							);

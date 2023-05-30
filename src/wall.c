@@ -104,12 +104,16 @@ moving_wall_resolver(
 		.height = p->height
 	};
 	rodeo_rectangle_t intersection = rodeo_collision_2d_get_collision_rect(p, w);
+	// left collision
 	if (intersection.width < intersection.height) {
-		if (intersection.x == step.x) {
+		// colliding left/right
+		// if x equal push right
+		if (intersection.x >= step.x) {
 			p->x = w->x + w->width;
 			if (p->dx < 0) {
 				p->dx = 0;
 			}
+		// else push left
 		} else {
 			p->x = w->x - p->width;
 			if (p->dx > 0) {
@@ -118,11 +122,14 @@ moving_wall_resolver(
 		}
 	}
 	else if (intersection.height < intersection.width) {
-		if (intersection.y == step.y) {
+		// colliding up/down
+		// if y equal push down
+		if (intersection.y >= step.y) {
 			p->y = w->y + w->height;
 			if (p->dy < 0) {
 				p->dy = 0;
 			}
+		// else push up
 		} else {
 			p->y = w->y - p->height;
 			if (p->dy > 0) {
@@ -130,6 +137,8 @@ moving_wall_resolver(
 			}
 		}
 	}
+	// tunneled into a hitbox
+	// don't allow movement
 	else if (p->width == w->width && p->height == w->height) {
 		p->dx = 0;
 		p->dy = 0;
