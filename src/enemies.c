@@ -13,6 +13,7 @@ static rodeo_texture_2d_t squid_texture;
 static cvec_enemy_t enemies = {0};
 static cvec_enemy_t ghosts = {0};
 static float spawn_cooldown = 0;
+static uint16_t enemy_count = 0;
 
 void
 init_enemies(void)
@@ -36,6 +37,12 @@ deinit_enemies(void)
 	rodeo_texture_2d_destroy(&amonghost_texture);
 }
 
+uint16_t
+get_enemy_count(void)
+{
+	return enemy_count;
+}
+
 enemy_t*
 spawn_enemy(float x, float y)
 {
@@ -52,6 +59,7 @@ spawn_enemy(float x, float y)
 
 	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
 	world_id id = rodeo_collision_2d_world_item_create(enemy_collision_world, enemy_collision)->id;
+	enemy_count++;
 
 	return cvec_enemy_t_push(
 		enemy_obj_world,
@@ -412,6 +420,7 @@ void enemy_destroy(
 	cvec_enemy_t_value* enemy 
 )
 {
+	enemy_count--;
 	cvec_enemy_t *enemy_vec = &enemies;
 	if(enemy->weapon.type == enemy_weapon_basic)
 	{

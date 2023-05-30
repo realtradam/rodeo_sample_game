@@ -55,6 +55,9 @@ deinit_enemies(void);
 		deinit_enemies() \
 	)
 
+uint16_t
+get_enemy_count(void);
+
 enemy_t*
 spawn_enemy(
     float x,

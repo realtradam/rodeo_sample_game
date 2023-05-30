@@ -45,7 +45,11 @@ main_loop(void)
 
 		player_shoot(get_player_bullet_world());
 		enemies_attempt_weapon_fire();
-		attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
+		if (get_enemy_count() < 50)
+		{
+			attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
+		}
+		
 
 		group_follow_target(get_player_position());
 
@@ -87,6 +91,13 @@ main_loop(void)
 			" fps: %.2f ",
 			time_var
 		);
+
+		rodeo_debug_text_draw(
+			2,
+			4,
+			" enemy count: %d ",
+			get_enemy_count()
+		);
 	}
 }
 
@@ -126,10 +137,10 @@ main(void)
 					{
 						wall_init_do()
 						{
-							spawn_enemy(400.0f,700.0f);
-							spawn_enemy(900.0f,700.0f);
-							spawn_enemy(400.0f,100.0f);
-							spawn_enemy(900.0f,100.0f);
+							//spawn_enemy(400.0f,700.0f);
+							//spawn_enemy(900.0f,700.0f);
+							//spawn_enemy(400.0f,100.0f);
+							//spawn_enemy(900.0f,100.0f);
 							rodeo_mainLoop_run(
 								main_loop
 							);
