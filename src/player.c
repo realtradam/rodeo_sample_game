@@ -62,7 +62,7 @@ init_player(void)
 		}
 	)->id;
 	player.sprite = (sprite_t){
-	.iter = 0,
+	.iter = 60,
 	.config = {
 		.texture = &player.texture,
 		.width = 128,
@@ -147,10 +147,12 @@ parse_player_input(void)
 	// if you arent mid jump, then record attempted movement
 	if(player.move_state != mv_state_jumping)
 	{
-		player_position->dx = *(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL);
-		player_position->dy = *(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL);
+		float input_lr = (*(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL));
+		float input_ud = (*(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL));
+		player_position->dx = input_lr * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f));
+		player_position->dy = input_ud * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f));
 
-		if(((player_position->dy != 0) || (player_position->dx != 0)) && player.move_state == mv_state_standing)
+		if(((input_lr != 0) || (input_ud != 0)) && player.move_state == mv_state_standing)
 		{
 			player.move_state = mv_state_jumping;
 			player_position->dy = 0;
@@ -159,10 +161,11 @@ parse_player_input(void)
 	}
 }
 
+
+
 void
 move_player(void)
 {
-	/*
 	if(player.move_state != mv_state_standing)
 	{
 		player.sprite.iter += 1;
@@ -180,12 +183,11 @@ move_player(void)
 	{
 		rodeo_audio_sound_play(bubbles_sound);
 	}
-	*/
-	player.move_state = mv_state_mid_air;
+
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	player_position->x += player_position->dx * rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f);
+	player_position->x += player_position->dx;
 	player_position->dx = 0;
-	player_position->y += player_position->dy * rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f);
+	player_position->y += player_position->dy;
 	player_position->dy = 0;
 	update_aim_position();
 }

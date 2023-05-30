@@ -29,7 +29,6 @@ main_loop(void)
 	mrodeo_frame_do()
 	{
 		parse_player_input();
-		move_player();
 
 		if(*(bool*)play_sound_input(NULL, NULL))
 		{
@@ -44,25 +43,28 @@ main_loop(void)
 			rodeo_audio_music_stop_fadeOut(1000);
 		}
 
-		//player_shoot(get_player_bullet_world());
-		//enemies_attempt_weapon_fire();
-		//attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
+		player_shoot(get_player_bullet_world());
+		enemies_attempt_weapon_fire();
+		attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
 
-		move_bullets();
-		move_enemies();
 		group_follow_target(get_player_position());
+
 		draw_level();
 		draw_bullets();
 		draw_player();
 		draw_enemies();
 		draw_hp_bar();
+
 		detect_bullet_enemy_collisions();
 		detect_bullet_wall_collisions();
-		//detect_player_enemy_collisions();
+		detect_player_enemy_collisions();
 		detect_player_wall_collisions();
 		detect_enemy_wall_collisions();
 
-		/*
+		move_bullets();
+		move_enemies();
+		move_player();
+
 		rodeo_debug_text_draw(
 			1,
 			1,
@@ -85,7 +87,6 @@ main_loop(void)
 			" fps: %.2f ",
 			time_var
 		);
-		*/
 	}
 }
 
