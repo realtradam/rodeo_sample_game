@@ -148,10 +148,13 @@ bullet_destroy(
 	cvec_bullet_t_value* bullet
 )
 {
+	if (bullet->id.world == &player_bullet_collision_world)
+	{
+		rodeo_audio_sound_play(pop_sound);
+	}
 	rodeo_collision_2d_world_item_destroy_by_id(bullet->id);
 	*bullet = *cvec_bullet_t_back(&bullets);
     cvec_bullet_t_pop(&bullets);
-	rodeo_audio_sound_play(pop_sound);
 }
 
 void bullet_wall_resolver(
