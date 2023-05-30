@@ -39,19 +39,22 @@ deinit_enemies(void)
 enemy_t*
 spawn_enemy(float x, float y)
 {
-	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
-	world_id id = rodeo_collision_2d_world_item_create(&collision_enemies_world, enemy_collision)->id;
 	uint64_t rng = rodeo_random_uint64_get();
-
-	cvec_enemy_t *enemy_collision_world = &enemies;
+	cvec_enemy_t *enemy_obj_world = &enemies;
+	rodeo_collision_2d_world_t *enemy_collision_world = &collision_enemies_world;
+	
 
 	if(rng % 3 == enemy_weapon_basic)
 	{
-		enemy_collision_world = &ghosts;
+		enemy_obj_world = &ghosts;
+		enemy_collision_world = &collision_ghosts_world;
 	}
 
+	rodeo_collision_2d_world_item_t enemy_collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
+	world_id id = rodeo_collision_2d_world_item_create(enemy_collision_world, enemy_collision)->id;
+
 	return cvec_enemy_t_push(
-		enemy_collision_world,
+		enemy_obj_world,
 		(enemy_t){
 			.hp = 20.0,
 			.move_speed = ((float)(rng % 3) + 1.0f) * 0.3f,
@@ -87,7 +90,7 @@ draw_enemy(cvec_collision_2d_world_item_value *enemy)
 				{
 					texture = &amonghost_texture;
 					color = (rodeo_color_RGBAFloat_t){
-						.array = { 0.25f, 0.95f, 0.25f, 0.6f  }
+						.array = { 0.25f, 0.95f, 0.25f, 0.5f  }
 					};
 				}
 				break;
