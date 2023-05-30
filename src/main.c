@@ -92,8 +92,6 @@ main_loop(void)
 int
 main(void)
 {
-	register_inputs();
-	
 	rodeo_log(
 		rodeo_logLevel_info,
 		"Testing logging... It seems to work!"
@@ -108,29 +106,34 @@ main(void)
 	);
 
 
-	mrodeo_window_do(window_height, window_width, cstr_lit("Rodeo Window"))
+	register_inputs();
+	inputs_register_do()
 	{
-		renderer = rodeo_renderer_name_get();
-		rodeo_frame_limit_set(60);
+		mrodeo_window_do(window_height, window_width, cstr_lit("Rodeo Window"))
+		{
+			renderer = rodeo_renderer_name_get();
+			rodeo_frame_limit_set(60);
 
-		scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
-		music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
+			scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
+			music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
 
-		init_bullets();
-		init_player();
-		init_enemies();
-		init_wall();
-
-
-		rodeo_mainLoop_run(
-			main_loop
-		);
-
-		deinit_player();
-		deinit_enemies();
+			bullets_init_do()
+			{
+				player_init_do()
+				{
+					enemies_init_do()
+					{
+						wall_init_do()
+						{
+							rodeo_mainLoop_run(
+								main_loop
+							);
+						}
+					}
+				}
+			}
+		}
 	}
-
-	unregister_inputs();
 
 	return 0;
 }

@@ -28,6 +28,12 @@ init_player(void);
 void
 deinit_player(void);
 
+#define player_init_do() \
+	mrodeo_defer_do( \
+		init_player(), \
+		deinit_player() \
+	)
+
 void
 draw_player(void);
 

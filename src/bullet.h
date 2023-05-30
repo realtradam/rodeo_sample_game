@@ -21,6 +21,12 @@ init_bullets(void);
 void
 deinit_bullets(void);
 
+#define bullets_init_do() \
+	mrodeo_defer_do( \
+		init_bullets(), \
+		deinit_bullets() \
+	)
+
 bullet_t *
 spawn_bullet(
 	float x,

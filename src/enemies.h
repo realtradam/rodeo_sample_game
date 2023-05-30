@@ -49,6 +49,12 @@ init_enemies(void);
 void
 deinit_enemies(void);
 
+#define enemies_init_do() \
+	mrodeo_defer_do( \
+		init_enemies(), \
+		deinit_enemies() \
+	)
+
 enemy_t*
 spawn_enemy(
     float x,

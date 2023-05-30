@@ -77,3 +77,9 @@ register_inputs(void);
 
 void
 unregister_inputs(void);
+
+#define inputs_register_do() \
+	mrodeo_defer_do( \
+		register_inputs(), \
+		unregister_inputs() \
+	)

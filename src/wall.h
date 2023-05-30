@@ -6,6 +6,12 @@ init_wall(void);
 void
 deinit_wall(void);
 
+#define wall_init_do() \
+	mrodeo_defer_do( \
+		init_wall(), \
+		deinit_wall() \
+	)
+
 rodeo_collision_2d_world_t *
 get_wall_world(void);
 
