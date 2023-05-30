@@ -171,9 +171,9 @@ move_enemies(void)
 		{
 			continue;
 		}
-		enemy->x += enemy->dx;
+		enemy->x += enemy->dx * rodeo_frame_time_get() / (1000.0f/60.0f);
 		enemy->dx = 0;
-		enemy->y += enemy->dy;
+		enemy->y += enemy->dy * rodeo_frame_time_get() / (1000.0f/60.0f);
 		enemy->dy = 0;
 	}
 	c_foreach(i, cvec_enemy_t, ghosts) {
@@ -182,9 +182,9 @@ move_enemies(void)
 		{
 			continue;
 		}
-		enemy->x += enemy->dx;
+		enemy->x += enemy->dx * rodeo_frame_time_get() / (1000.0f/60.0f);
 		enemy->dx = 0;
-		enemy->y += enemy->dy;
+		enemy->y += enemy->dy * rodeo_frame_time_get() / (1000.0f/60.0f);
 		enemy->dy = 0;
 	}
 }

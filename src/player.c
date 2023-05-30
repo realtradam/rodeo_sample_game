@@ -55,8 +55,8 @@ init_player(void)
 	player.collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
 		(rodeo_collision_2d_world_item_t){
-			.x = 1600/3,
-			.y = 900/3,
+			.x = 1600/2,
+			.y = 900/2,
 			.width = orc_size[0],
 			.height = orc_size[1]
 		}
@@ -162,6 +162,7 @@ parse_player_input(void)
 void
 move_player(void)
 {
+	/*
 	if(player.move_state != mv_state_standing)
 	{
 		player.sprite.iter += 1;
@@ -179,10 +180,12 @@ move_player(void)
 	{
 		rodeo_audio_sound_play(bubbles_sound);
 	}
+	*/
+	player.move_state = mv_state_mid_air;
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	player_position->x += player_position->dx * ((60.0f - (float)player.sprite.iter) / 60.0f);
+	player_position->x += player_position->dx * rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f);
 	player_position->dx = 0;
-	player_position->y += player_position->dy * ((60.0f - (float)player.sprite.iter) / 60.0f);
+	player_position->y += player_position->dy * rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f);
 	player_position->dy = 0;
 	update_aim_position();
 }

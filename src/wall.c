@@ -97,18 +97,18 @@ moving_wall_resolver(
 {
 	rodeo_collision_2d_world_item_t *p = obj_collision;
 	rodeo_collision_2d_world_item_t *w = wall_collision;
-	rodeo_rectangle_t step = (rodeo_rectangle_t){
-		.x = p->x + p->dx * rodeo_frame_time_get(),
-		.y = p->y + p->dy * rodeo_frame_time_get(),
+	rodeo_collision_2d_world_item_t step = (rodeo_collision_2d_world_item_t){
+		.x = p->x + p->dx * rodeo_frame_time_get() / (1000.0f/60.0f),
+		.y = p->y + p->dy * rodeo_frame_time_get() / (1000.0f/60.0f),
 		.width = p->width,
 		.height = p->height
 	};
-	rodeo_rectangle_t intersection = rodeo_collision_2d_get_collision_rect(p, w);
+	rodeo_rectangle_t intersection = rodeo_collision_2d_get_collision_rect(&step, w);
 	// left collision
 	if (intersection.width < intersection.height) {
 		// colliding left/right
 		// if x equal push right
-		if (intersection.x >= step.x) {
+		if (intersection.x == step.x) {
 			p->x = w->x + w->width;
 			if (p->dx < 0) {
 				p->dx = 0;
@@ -124,7 +124,7 @@ moving_wall_resolver(
 	else if (intersection.height < intersection.width) {
 		// colliding up/down
 		// if y equal push down
-		if (intersection.y >= step.y) {
+		if (intersection.y == step.y) {
 			p->y = w->y + w->height;
 			if (p->dy < 0) {
 				p->dy = 0;

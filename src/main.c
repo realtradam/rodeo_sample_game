@@ -58,7 +58,7 @@ main_loop(void)
 		draw_hp_bar();
 		detect_bullet_enemy_collisions();
 		detect_bullet_wall_collisions();
-		detect_player_enemy_collisions();
+		//detect_player_enemy_collisions();
 		detect_player_wall_collisions();
 		detect_enemy_wall_collisions();
 
@@ -125,7 +125,10 @@ main(void)
 					{
 						wall_init_do()
 						{
-							spawn_enemy(764.0f+73.0f,500.0f);
+							spawn_enemy(400.0f,700.0f);
+							spawn_enemy(900.0f,700.0f);
+							spawn_enemy(400.0f,100.0f);
+							spawn_enemy(900.0f,100.0f);
 							rodeo_mainLoop_run(
 								main_loop
 							);
