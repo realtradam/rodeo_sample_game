@@ -9,6 +9,8 @@
 #include "cglm/vec2.h"
 #include "wall.h"
 
+#include <math.h>
+
 struct player_t
 {
 	sprite_t sprite;
@@ -147,12 +149,23 @@ parse_player_input(void)
 	// if you arent mid jump, then record attempted movement
 	if(player.move_state != mv_state_jumping)
 	{
-		float input_lr = (*(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL));
-		float input_ud = (*(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL));
-		player_position->dx = input_lr * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f));
-		player_position->dy = input_ud * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f));
+		vec2 inputs = {
+			(*(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL)),
+			 (*(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL))
+		};
+		if(glm_vec2_norm(inputs) > 1)
+		{
+			glm_vec2_normalize(inputs);
+		}
+		rodeo_log(
+			rodeo_logLevel_info,
+			"%f, %f",
+			inputs[0], inputs[1]
+		);
+		player_position->dx = inputs[0] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
+		player_position->dy = inputs[1] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
 
-		if(((input_lr != 0) || (input_ud != 0)) && player.move_state == mv_state_standing)
+		if(((inputs[0] != 0) || (inputs[1] != 0)) && player.move_state == mv_state_standing)
 		{
 			player.move_state = mv_state_jumping;
 			player_position->dy = 0;
@@ -168,18 +181,18 @@ move_player(void)
 {
 	if(player.move_state != mv_state_standing)
 	{
-		player.sprite.iter += 1;
-		player.sprite.iter %= player.sprite.config.count;
+		player.sprite.iter += 1 * rodeo_frame_time_get() / (1000.0f/60.0f);
+		player.sprite.iter = fmodf(player.sprite.iter, (float)player.sprite.config.count);
 		if(player.sprite.iter > 19)
 		{
 			player.move_state = mv_state_mid_air;
 		}
 	}
-	if(player.sprite.iter == 60)
+	if((uint32_t)player.sprite.iter == 60)
 	{
 		player.move_state = mv_state_standing;
 	}
-	if(player.sprite.iter == 1)
+	if((uint32_t)player.sprite.iter == 1)
 	{
 		rodeo_audio_sound_play(bubbles_sound);
 	}

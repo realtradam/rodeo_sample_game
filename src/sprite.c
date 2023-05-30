@@ -13,7 +13,7 @@ draw_sprite(sprite_t *sprite, float x, float y, float scale, rodeo_color_RGBAFlo
 			.height = (float)sprite->config.height * scale 
 		},
 		&(rodeo_rectangle_t){ 
-			.x = (float)sprite->config.width * (float)sprite->iter,
+			.x = (float)sprite->config.width * (float)(uint32_t)sprite->iter,
 			.y = 0,
 			.width = (float)sprite->config.width,
 			.height = (float)sprite->config.height

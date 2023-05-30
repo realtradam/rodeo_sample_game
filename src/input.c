@@ -2,6 +2,7 @@
 #include "input.h"
 #include "rodeo/input.h"
 #include "rodeo/audio.h"
+#include "cglm/vec2.h"
 
 scenes_and_commands_t inputs = {0};
 
@@ -40,10 +41,10 @@ units_move_generic_input(
 	if(submit_inputs)
 	{
 		*move = 0.0f;
-		*move += (should_be_positive ? 1 : -1) * (float)*binary_key * 5.0f;
+		*move += (should_be_positive ? 1 : -1) * (float)*binary_key;
 		*move += (*unbounded_range);
 		*unbounded_range = 0.0f;
-		*move += ((*bounded_range) * 15.0f);
+		*move += ((*bounded_range) * 3);
 	}
 	if(input_state != NULL)
 	{

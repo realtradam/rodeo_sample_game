@@ -5,7 +5,7 @@
 typedef
 struct
 {
-	uint32_t iter;
+	float iter;
 	struct config
 	{
 		uint32_t width;
