@@ -153,15 +153,10 @@ parse_player_input(void)
 			(*(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL)),
 			 (*(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL))
 		};
-		if(glm_vec2_norm(inputs) > 1)
+		if(glm_vec2_norm2(inputs) > 1)
 		{
 			glm_vec2_normalize(inputs);
 		}
-		rodeo_log(
-			rodeo_logLevel_info,
-			"%f, %f",
-			inputs[0], inputs[1]
-		);
 		player_position->dx = inputs[0] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
 		player_position->dy = inputs[1] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
 
