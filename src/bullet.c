@@ -160,7 +160,10 @@ bullet_destroy(
 	cvec_bullet_t_value* bullet
 )
 {
-	if (bullet->id.world == &player_bullet_collision_world)
+	bool player_is_moving =
+		(*(float*)units_move_right_input(NULL, NULL) + *(float*)units_move_left_input(NULL, NULL)) != 0 ||
+		 (*(float*)units_move_down_input(NULL, NULL) + *(float*)units_move_up_input(NULL, NULL)) != 0;
+	if (bullet->id.world == &player_bullet_collision_world || !player_is_moving || get_player_hp() <= 0)
 	{
 		rodeo_audio_sound_play(pop_sound);
 	}
