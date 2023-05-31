@@ -54,7 +54,7 @@ init_player(void)
 	player.heart_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
 	player.sprite.config.texture = &player.texture;
 	//player_collision_world = rodeo_collision_2d_world_create();
-	//player_collision_world = (rodeo_collision_2d_world_t){0};
+	player_collision_world = (rodeo_collision_2d_world_t){0};
 	player.collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
 		(rodeo_collision_2d_world_item_t){
@@ -95,8 +95,8 @@ reset_player(void)
 	cvec_collision_2d_world_item_value *player_position = get_player_position();
 	player_position->dx = 0;
 	player_position->dy = 0;
-	player_position->x = 200;
-	player_position->y = 200;
+	player_position->x = 630.0f;
+	player_position->y = 263.0f;
 	player.weapon.cooldown = 0;
 }
 
@@ -275,11 +275,17 @@ void player_enemy_resolver(
 			"player is dead"
 		);*/
 	} else if (player.damage_timer >= player.damage_cooldown_rate) {
-		rodeo_log(
+		/*rodeo_log(
 			rodeo_logLevel_info,
 			"player health is now %d",
 			player.hp
 		);
+		rodeo_log(
+			rodeo_logLevel_info,
+			"hit by enemy at %f, %f, player is at %f, %f",
+			enemy_collision->x, enemy_collision->y,
+			player_collision->x, player_collision->y
+		);*/
 		player.hp -= 10;
 		player.damage_timer = 0;
 		enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
@@ -299,11 +305,17 @@ void player_bullet_resolver(
 			"player is dead"
 		);*/
 	} else if (player.damage_timer >= player.damage_cooldown_rate) {
-		rodeo_log(
+		/*rodeo_log(
 			rodeo_logLevel_info,
 			"player health is now %d",
 			player.hp
 		);
+		rodeo_log(
+			rodeo_logLevel_info,
+			"hit by bullet at %f, %f, player is at %f, %f",
+			bullet_collision->x, bullet_collision->y,
+			player_collision->x, player_collision->y
+		);*/
 		player.hp -= 10;
 		player.damage_timer = 0;
 	}
