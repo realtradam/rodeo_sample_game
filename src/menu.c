@@ -15,10 +15,10 @@ void
 init_menu(void)
 {
 	splash_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/splash.png"));
-	main_menu_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainmenu.png"));
-	gameover_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/gameover.png"));
+	main_menu_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/main_menu.png"));
+	gameover_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/restart_menu.png"));
 	
-	menu_state = menu_state_splash;
+	menu_state = menu_state_main;
 	splash_timer = 3000.0f;
 	rodeo_input_scene_activate(get_command_inputs()->menu_scene);
 }
@@ -34,6 +34,7 @@ deinit_menu(void)
 void
 draw_menu(void)
 {
+	float transparency = 0.65f;
 	if (splash_timer > 0 && menu_state == menu_state_splash)
 	{
 		splash_timer -= rodeo_frame_time_get();
@@ -49,6 +50,13 @@ draw_menu(void)
 	}
 	else if (menu_state == menu_state_main)
 	{
+
+		rodeo_texture_2d_draw(
+			&screen_dimensions, 
+			&screen_dimensions,
+			&(rodeo_color_RGBAFloat_t){ .array = { 0,0,0,transparency }},
+			NULL
+		);
 		rodeo_texture_2d_draw(
 			&screen_dimensions, 
 			&screen_dimensions,
@@ -58,6 +66,12 @@ draw_menu(void)
 	}
 	else if (menu_state == menu_state_gameover)
 	{
+		rodeo_texture_2d_draw(
+			&screen_dimensions, 
+			&screen_dimensions,
+			&(rodeo_color_RGBAFloat_t){ .array = { 0,0,0,transparency }},
+			NULL
+		);
 		rodeo_texture_2d_draw(
 			&screen_dimensions, 
 			&screen_dimensions,
