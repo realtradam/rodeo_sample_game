@@ -27,6 +27,9 @@ deinit_bullets(void);
 		deinit_bullets() \
 	)
 
+void
+reset_bullets(void);
+
 bullet_t *
 spawn_bullet(
 	float x,

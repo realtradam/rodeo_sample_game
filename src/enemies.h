@@ -55,6 +55,9 @@ deinit_enemies(void);
 		deinit_enemies() \
 	)
 
+void
+reset_enemies(void);
+
 uint32_t
 get_enemy_count(void);
 

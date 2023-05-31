@@ -11,3 +11,6 @@ deinit_game_systems(void);
 		init_game_systems(), \
 		deinit_game_systems() \
 	)
+
+void
+reset_game_systems(void);

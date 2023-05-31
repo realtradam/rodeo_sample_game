@@ -238,6 +238,25 @@ play_sound_input3(rodeo_input_any_state_t *input_state, void *data)
 	return &down;
 }
 
+void*
+menu_accept_input(rodeo_input_any_state_t *input_state, void *data)
+{
+	static bool down = false;
+
+	if(NULL != input_state)
+	{
+		down = input_state->data.binary_state;
+	}
+
+	return &down;
+}
+
+scenes_and_commands_t *
+get_command_inputs(void)
+{
+	return &inputs;
+}
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -250,9 +269,10 @@ register_inputs(void)
 {
 	// make scene
 	inputs.scene = rodeo_input_scene_create();
+	inputs.menu_scene = rodeo_input_scene_create();
 
 	// - make commands -
-	inputs.create = rodeo_input_command_create(rodeo_input_type_Binary);
+	inputs.menu_accept = rodeo_input_command_create(rodeo_input_type_Binary);
 
 	inputs.up = rodeo_input_command_create(
 		rodeo_input_type_Binary | rodeo_input_type_UnboundedRange | rodeo_input_type_BoundedRange
@@ -279,9 +299,9 @@ register_inputs(void)
 	// --
 
 	// - register inputs -
-	rodeo_input_command_register_binary_scancode(inputs.create, rodeo_input_binary_scancode_SPACE);
-	rodeo_input_command_register_binary_controllerButton(inputs.create, rodeo_input_binary_controllerButton_A);
-	rodeo_input_command_register_binary_mouseButton(inputs.create, rodeo_input_binary_mouseButton_LEFT);
+	rodeo_input_command_register_binary_scancode(inputs.menu_accept, rodeo_input_binary_scancode_SPACE);
+	rodeo_input_command_register_binary_controllerButton(inputs.menu_accept, rodeo_input_binary_controllerButton_A);
+	rodeo_input_command_register_binary_mouseButton(inputs.menu_accept, rodeo_input_binary_mouseButton_LEFT);
 
 	rodeo_input_command_register_binary_scancode(inputs.up, rodeo_input_binary_scancode_W);
 	rodeo_input_command_register_binary_scancode(inputs.down, rodeo_input_binary_scancode_S);
@@ -302,7 +322,7 @@ register_inputs(void)
 	// --
 
 	// - register callbacks -
-	rodeo_input_command_register_callback(inputs.create, *summon_units_input);
+	//rodeo_input_command_register_callback(inputs.create, *summon_units_input);
 	rodeo_input_command_register_callback(inputs.up, *units_move_up_input);
 	rodeo_input_command_register_callback(inputs.down, *units_move_down_input);
 	rodeo_input_command_register_callback(inputs.left, *units_move_left_input);
@@ -311,10 +331,12 @@ register_inputs(void)
 	rodeo_input_command_register_callback(inputs.play_sound, *play_sound_input);
 	rodeo_input_command_register_callback(inputs.play_sound2, *play_sound_input2);
 	rodeo_input_command_register_callback(inputs.play_sound3, *play_sound_input3);
+
+	rodeo_input_command_register_callback(inputs.menu_accept, *menu_accept_input);
 	// --
 
 	// - register commands -
-	rodeo_input_scene_register_command(inputs.scene, inputs.create);
+	//rodeo_input_scene_register_command(inputs.scene, inputs.create);
 	rodeo_input_scene_register_command(inputs.scene, inputs.up);
 	rodeo_input_scene_register_command(inputs.scene, inputs.down);
 	rodeo_input_scene_register_command(inputs.scene, inputs.left);
@@ -323,6 +345,8 @@ register_inputs(void)
 	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound);
 	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound2);
 	rodeo_input_scene_register_command(inputs.scene, inputs.play_sound3);
+
+	rodeo_input_scene_register_command(inputs.menu_scene, inputs.menu_accept);
 	// --
 
 	// activate scene
@@ -332,7 +356,8 @@ register_inputs(void)
 void
 unregister_inputs(void)
 {
-	rodeo_input_scene_unregister_command(inputs.scene, inputs.create);
-	rodeo_input_command_destroy(inputs.create);
+	//rodeo_input_scene_unregister_command(inputs.scene, inputs.create);
+	//rodeo_input_command_destroy(inputs.create);
 	rodeo_input_scene_destroy(inputs.scene);
+	rodeo_input_scene_destroy(inputs.menu_scene);
 }

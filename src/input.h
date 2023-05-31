@@ -5,6 +5,8 @@ typedef
 struct
 {
 	rodeo_input_scene_t *scene;
+	rodeo_input_scene_t *menu_scene;
+	rodeo_input_command_t *menu_accept;
 	rodeo_input_command_t *create;
 	rodeo_input_command_t *left;
 	rodeo_input_command_t *right;
@@ -71,6 +73,15 @@ play_sound_input3(
 	rodeo_input_any_state_t *input_state,
 	void *data
 );
+
+void*
+menu_accept_input(
+	rodeo_input_any_state_t *input_state,
+	void *data
+);
+
+scenes_and_commands_t *
+get_command_inputs(void);
 
 void
 register_inputs(void);

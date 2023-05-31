@@ -41,6 +41,19 @@ deinit_enemies(void)
 	rodeo_texture_2d_destroy(&enemy_texture);
 }
 
+void
+reset_enemies(void)
+{
+	c_foreach_rv(i, cvec_enemy_t, enemies)
+	{
+		enemy_destroy(i.ref);
+	}
+	c_foreach_rv(i, cvec_enemy_t, ghosts)
+	{
+		enemy_destroy(i.ref);
+	}
+}
+
 uint32_t
 get_enemy_count(void)
 {

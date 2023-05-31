@@ -39,7 +39,7 @@ static rodeo_audio_sound_t *bubbles_sound;
 // 61 standing
 // 20-60 mid iar
 
-static rodeo_collision_2d_world_t player_collision_world;
+static rodeo_collision_2d_world_t player_collision_world = {0};
 static aim_position_t aim_position;
 
 static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
@@ -53,18 +53,16 @@ init_player(void)
 	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
 	player.heart_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
 	player.sprite.config.texture = &player.texture;
-	player_collision_world = rodeo_collision_2d_world_create();
+	//player_collision_world = rodeo_collision_2d_world_create();
+	//player_collision_world = (rodeo_collision_2d_world_t){0};
 	player.collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
 		(rodeo_collision_2d_world_item_t){
-			.x = 1600/2,
-			.y = 900/2,
 			.width = orc_size[0],
 			.height = orc_size[1]
 		}
 	)->id;
 	player.sprite = (sprite_t){
-	.iter = 60,
 	.config = {
 		.texture = &player.texture,
 		.width = 128,
@@ -72,12 +70,9 @@ init_player(void)
 		.count = 61
 	}
 	};
-	player.hp = 100;
-	player.weapon.cooldown = 0;
+	reset_player();
 	player.weapon.firerate = 0.1f;
 	player.weapon.spread = 0.425f;
-	aim_position.x = 101;
-	aim_position.y = 100;
 	player.damage_cooldown_rate = 1000.0f;
 }
 
@@ -86,7 +81,23 @@ deinit_player(void)
 {
 	rodeo_texture_2d_destroy(&player.texture);
 	rodeo_collision_2d_world_destroy(&player_collision_world);
+	//player_collision_world = (rodeo_collision_2d_world_t){0};
 	rodeo_audio_sound_destroy(bubbles_sound);
+}
+
+void
+reset_player(void)
+{
+	player.sprite.iter = 60;
+	player.hp = 100;
+	aim_position.x = 101;
+	aim_position.y = 100;
+	cvec_collision_2d_world_item_value *player_position = get_player_position();
+	player_position->dx = 0;
+	player_position->dy = 0;
+	player_position->x = 200;
+	player_position->y = 200;
+	player.weapon.cooldown = 0;
 }
 
 void
@@ -361,3 +372,8 @@ draw_aim(float player_x, float player_y, float scale)
 		);
 }
 
+int32_t
+get_player_hp(void)
+{
+	return player.hp;
+}

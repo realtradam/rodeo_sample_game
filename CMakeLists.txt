@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
 	"src/wall.c"
 	"src/debug.c"
 	"src/init.c"
+	"src/menu.c"
 	)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)

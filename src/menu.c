@@ -1,0 +1,102 @@
+#include "input.h"
+#include "init.h"
+#include "menu.h"
+#include "player.h"
+#include "rodeo.h"
+
+rodeo_texture_2d_t splash_texture;
+rodeo_texture_2d_t main_menu_texture;
+rodeo_texture_2d_t gameover_texture;
+menu_state_t menu_state;
+float splash_timer;
+rodeo_rectangle_t screen_dimensions = (rodeo_rectangle_t){.x = 0, .y = 0, .width = 1600, .height = 900};
+
+void
+init_menu(void)
+{
+	splash_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/splash.png"));
+	main_menu_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainmenu.png"));
+	gameover_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/gameover.png"));
+	
+	menu_state = menu_state_splash;
+	splash_timer = 3000.0f;
+	rodeo_input_scene_activate(get_command_inputs()->menu_scene);
+}
+
+void
+deinit_menu(void)
+{
+	rodeo_texture_2d_destroy(&splash_texture);
+	rodeo_texture_2d_destroy(&main_menu_texture);
+	rodeo_texture_2d_destroy(&gameover_texture);
+}
+
+void
+draw_menu(void)
+{
+	if (splash_timer > 0 && menu_state == menu_state_splash)
+	{
+		splash_timer -= rodeo_frame_time_get();
+		rodeo_texture_2d_draw(
+			&screen_dimensions, 
+			&screen_dimensions,
+			NULL,
+			&splash_texture
+		);
+		if (splash_timer <= 0) {
+			menu_state = menu_state_main;
+		}
+	}
+	else if (menu_state == menu_state_main)
+	{
+		rodeo_texture_2d_draw(
+			&screen_dimensions, 
+			&screen_dimensions,
+			NULL,
+			&main_menu_texture
+		);
+	}
+	else if (menu_state == menu_state_gameover)
+	{
+		rodeo_texture_2d_draw(
+			&screen_dimensions, 
+			&screen_dimensions,
+			NULL,
+			&gameover_texture
+		);
+	}
+}
+
+void
+parse_menu_input(void)
+{
+	int32_t hp = get_player_hp();
+	bool input = *(bool*)menu_accept_input(NULL, NULL);
+	
+	if (input)
+	{
+		rodeo_input_scene_activate(get_command_inputs()->scene);
+		if (menu_state == menu_state_gameover && hp <= 0)
+		{
+			reset_game_systems();
+			menu_state = menu_state_inactive;
+		}
+		else if (menu_state == menu_state_main)
+		{
+			init_game_systems();
+			menu_state = menu_state_inactive;
+		}
+	}
+}
+
+menu_state_t
+get_menu_state(void)
+{
+	return menu_state;
+}
+
+void
+set_menu_state(menu_state_t state)
+{
+	menu_state = state;
+}

@@ -29,6 +29,15 @@ deinit_bullets(void)
 	cvec_bullet_t_drop(&bullets);
 }
 
+void
+reset_bullets(void)
+{
+	c_foreach_rv(i, cvec_bullet_t, bullets)
+	{
+		bullet_destroy(i.ref);
+	}
+}
+
 bullet_t *
 spawn_bullet(
 	float x,

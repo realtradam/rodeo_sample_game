@@ -35,6 +35,9 @@ deinit_player(void);
 	)
 
 void
+reset_player(void);
+
+void
 draw_player(void);
 
 void
@@ -64,4 +67,5 @@ update_aim_position(void);
 void
 draw_aim(float player_x, float player_y, float scale);
 
-
+int32_t
+get_player_hp(void);

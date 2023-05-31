@@ -8,6 +8,7 @@
 #include "wall.h"
 #include "debug.h"
 #include "init.h"
+#include "menu.h"
 
 const uint16_t window_width = 1600;
 const uint16_t window_height = 900;
@@ -27,15 +28,26 @@ main_loop(void)
 
 	mrodeo_frame_do()
 	{
-		// retrieve and apply player input
-		parse_player_input();
+		if (get_player_hp() > 0 && get_menu_state() == menu_state_inactive)
+		{
+			// retrieve and apply player input
+			parse_player_input();
 
-		player_shoot(get_player_bullet_world());
-		enemies_attempt_weapon_fire();
+			player_shoot(get_player_bullet_world());
+			enemies_attempt_weapon_fire();
 
-		// spawn enemies
-		attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
-		
+			// spawn enemies
+			attempt_random_enemy_spawn((rodeo_rectangle_t){ 0, 0, window_width, window_height });
+		}
+		else 
+		{
+			parse_menu_input();
+			if (get_player_hp() <= 0)
+			{
+				set_menu_state(menu_state_gameover);
+			}
+		}
+
 		// run enemy movement ai
 		group_follow_target(get_player_position());
 
@@ -51,15 +63,22 @@ main_loop(void)
 		move_player();
 
 		draw_level();
-		draw_bullets();
-		draw_player();
-		draw_enemies();
-		draw_hp_bar();
+		if (get_menu_state() == menu_state_inactive || get_menu_state() == menu_state_gameover)
+		{
+			draw_bullets();
+			if (get_menu_state() != menu_state_gameover)
+			{
+				draw_player();
+			}
+			draw_enemies();
+			draw_hp_bar();
+		}
+		draw_menu();
 
-		draw_debug_text(
+		/*draw_debug_text(
 			renderer_name,
 			fps_display
-		);
+		);*/
 
 	}
 }
