@@ -24,6 +24,9 @@ deinit_bullets(void)
 {
 	rodeo_texture_2d_destroy(&bullet_texture);
 	rodeo_audio_sound_destroy(pop_sound);
+	rodeo_collision_2d_world_destroy(&player_bullet_collision_world);
+	rodeo_collision_2d_world_destroy(&enemy_bullet_collision_world);
+	cvec_bullet_t_drop(&bullets);
 }
 
 bullet_t *

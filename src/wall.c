@@ -47,6 +47,10 @@ void
 deinit_wall(void)
 {
 	rodeo_collision_2d_world_destroy(&collision_wall_world);
+	rodeo_texture_2d_destroy(&wall_texture);
+	rodeo_texture_2d_destroy(&floor_texture);
+	rodeo_texture_2d_destroy(&goat_texture);
+	rodeo_texture_2d_destroy(&logo_texture);
 }
 
 rodeo_collision_2d_world_t *
