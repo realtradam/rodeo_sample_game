@@ -88,7 +88,7 @@ main(void)
 {
 	inputs_register_do()
 	{
-		mrodeo_window_do(window_height, window_width, cstr_lit("Rodeo Window"))
+		mrodeo_window_do(window_height, window_width, cstr_lit("Bubbles, Behind"))
 		{
 			renderer_name = rodeo_renderer_name_get();
 			rodeo_frame_limit_set(60);

@@ -1,4 +1,4 @@
 #! /bin/sh
 
 #gdb ./build_dir/space_squad
-(cd ./build_dir/tux/ ; ./demo)
+(cd ./build_dir/tux/ ; ./index)

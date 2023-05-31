@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.1)
 
-project(demo
+project(index
 	LANGUAGES C
 	)
 
@@ -52,7 +52,7 @@ if(DEFINED EMSCRIPTEN)
 	set_target_properties(${PROJECT_NAME}
 		PROPERTIES
 		LINK_FLAGS
-		"--preload-file ${PROJECT_SOURCE_DIR}/external/RodeoKit/build_dir/shaders@shaders --preload-file ${PROJECT_SOURCE_DIR}/assets@assets --use-preload-plugins"
+		"--preload-file ${PROJECT_SOURCE_DIR}/external/RodeoKit/build_dir/shaders@shaders --preload-file ${PROJECT_SOURCE_DIR}/assets@assets --use-preload-plugins --shell-file ${PROJECT_SOURCE_DIR}/external_assets/shell.html"
 		)
 endif()
 

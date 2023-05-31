@@ -176,18 +176,6 @@ draw_enemy(cvec_collision_2d_world_item_value *enemy)
 				break;
 		}
 
-		if (enemy->x > 1600 || enemy->x < 0 || enemy->y > 900 || enemy->x < 0)
-		{
-			rodeo_log(
-				rodeo_logLevel_error,
-				"Bad position, x:%f, y:%f",
-				enemy->x,
-				enemy->y
-			);
-			return;
-		}
-
-		
 		   rodeo_texture_2d_draw(
 				&(rodeo_rectangle_t){
 					.x = enemy->x,
