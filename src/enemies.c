@@ -7,10 +7,10 @@
 
 static rodeo_collision_2d_world_t collision_enemies_world = {0};
 static rodeo_collision_2d_world_t collision_ghosts_world = {0};
-//static rodeo_texture_2d_t hinotamatchi_texture;
-//static rodeo_texture_2d_t amonghost_texture;
-//static rodeo_texture_2d_t squid_texture;
-static rodeo_texture_2d_t enemy_texture;
+//static rodeo_gfx_texture_2d_t hinotamatchi_texture;
+//static rodeo_gfx_texture_2d_t amonghost_texture;
+//static rodeo_gfx_texture_2d_t squid_texture;
+static rodeo_gfx_texture_2d_t enemy_texture;
 static cvec_enemy_t enemies = {0};
 static cvec_enemy_t ghosts = {0};
 static float spawn_cooldown = 0;
@@ -22,10 +22,10 @@ init_enemies(void)
 {
 	//collision_enemies_world = rodeo_collision_2d_world_create();
 	//enemies = cvec_enemy_t_init();
-	//squid_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/squid.png"));
-	//hinotamatchi_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/hinotamatchi.png"));
-	//amonghost_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/amonghost.png"));
-	enemy_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/enemy_sheet.png"));
+	//squid_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/squid.png"));
+	//hinotamatchi_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/hinotamatchi.png"));
+	//amonghost_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/amonghost.png"));
+	enemy_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/enemy_sheet.png"));
 }
 
 void
@@ -35,10 +35,10 @@ deinit_enemies(void)
 	rodeo_collision_2d_world_destroy(&collision_ghosts_world);
 	cvec_enemy_t_drop(&enemies);
 	cvec_enemy_t_drop(&ghosts);
-	//rodeo_texture_2d_destroy(&hinotamatchi_texture);
-	//rodeo_texture_2d_destroy(&squid_texture);
-	//rodeo_texture_2d_destroy(&amonghost_texture);
-	rodeo_texture_2d_destroy(&enemy_texture);
+	//rodeo_gfx_texture_2d_destroy(&hinotamatchi_texture);
+	//rodeo_gfx_texture_2d_destroy(&squid_texture);
+	//rodeo_gfx_texture_2d_destroy(&amonghost_texture);
+	rodeo_gfx_texture_2d_destroy(enemy_texture);
 }
 
 void
@@ -88,7 +88,10 @@ spawn_enemy(float x, float y)
 		enemy_count++;
 	}
 
-	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
+	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t)
+		{
+			.rect = { .x = x, .y = y, .width = 40, .height = 40 }
+		};
 	world_id id = rodeo_collision_2d_world_item_create(collision_world, collision)->id;
 
 	return cvec_enemy_t_push(
@@ -126,7 +129,10 @@ spawn_ghost(float x, float y)
 		enemy_count++;
 	}
 
-	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t){.x = x, .y = y, .width = 40, .height = 40};
+	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t)
+	{
+		.rect = { .x = x, .y = y, .width = 40, .height = 40 }
+	};
 	world_id id = rodeo_collision_2d_world_item_create(collision_world, collision)->id;
 
 	return cvec_enemy_t_push(
@@ -176,21 +182,16 @@ draw_enemy(cvec_collision_2d_world_item_value *enemy)
 				break;
 		}
 
-		   rodeo_texture_2d_draw(
-				&(rodeo_rectangle_t){
-					.x = enemy->x,
-					.y = enemy->y,
-					.width = enemy->width,
-					.height = enemy->height,
-				},
-				&(rodeo_rectangle_t){
+		   rodeo_gfx_texture_2d_draw(
+				enemy->rect,
+				(rodeo_rectangle_t){
 					.x = 0 + (40 * (float)enemy_obj->weapon.type),
 					.y = 0,
 					.width = 40,
 					.height = 40
 				},
-				&color,
-				&enemy_texture
+				color,
+				enemy_texture
 				);
 
 }
@@ -216,8 +217,8 @@ enemy_overlap_resolver(
 	enemy_t *enemy_b = get_enemy_by_id(b->id);
 	vec2 direction;
 	glm_vec2_sub(
-		(vec2){b->x, b->y},
-		(vec2){a->x, a->y},
+		(vec2){b->rect.x, b->rect.y},
+		(vec2){a->rect.x, a->rect.y},
 		direction
 	);
 	glm_vec2_normalize(direction);
@@ -245,9 +246,9 @@ move_enemies(void)
 		{
 			continue;
 		}
-		enemy->x += enemy->dx * rodeo_frame_time_get() / (1000.0f/60.0f);
+		enemy->rect.x += enemy->dx * rodeo_gfx_frame_time_get() / (1000.0f/60.0f);
 		enemy->dx = 0;
-		enemy->y += enemy->dy * rodeo_frame_time_get() / (1000.0f/60.0f);
+		enemy->rect.y += enemy->dy * rodeo_gfx_frame_time_get() / (1000.0f/60.0f);
 		enemy->dy = 0;
 	}
 	c_foreach(i, cvec_enemy_t, ghosts) {
@@ -256,9 +257,9 @@ move_enemies(void)
 		{
 			continue;
 		}
-		enemy->x += enemy->dx * rodeo_frame_time_get() / (1000.0f/60.0f);
+		enemy->rect.x += enemy->dx * rodeo_gfx_frame_time_get() / (1000.0f/60.0f);
 		enemy->dx = 0;
-		enemy->y += enemy->dy * rodeo_frame_time_get() / (1000.0f/60.0f);
+		enemy->rect.y += enemy->dy * rodeo_gfx_frame_time_get() / (1000.0f/60.0f);
 		enemy->dy = 0;
 	}
 }
@@ -287,8 +288,8 @@ enemies_attempt_weapon_fire(void)
 						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
 						vec2 dest;
 						glm_vec2_sub(
-							(vec2){ player->x, player->y },
-							(vec2){ enemy->x, enemy->y },
+							(vec2){ player->rect.x, player->rect.y },
+							(vec2){ enemy->rect.x, enemy->rect.y },
 							dest
 						);
 						glm_vec2_normalize(dest);
@@ -305,8 +306,8 @@ enemies_attempt_weapon_fire(void)
 						glm_vec2_scale(dest, 1.0, dest);
 
 						spawn_bullet(
-							enemy->x,
-							enemy->y,
+							enemy->rect.x,
+							enemy->rect.y,
 							dest[0],
 							dest[1],
 							get_enemy_bullet_world(),
@@ -320,7 +321,7 @@ enemies_attempt_weapon_fire(void)
 					}
 					else
 					{
-						i.ref->weapon.cooldown -= rodeo_frame_time_get()/1000.0f;
+						i.ref->weapon.cooldown -= rodeo_gfx_frame_time_get()/1000.0f;
 					}
 				}
 				break;
@@ -334,8 +335,8 @@ enemies_attempt_weapon_fire(void)
 						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
 						vec2 dest;
 						glm_vec2_sub(
-							(vec2){ player->x, player->y },
-							(vec2){ enemy->x, enemy->y },
+							(vec2){ player->rect.x, player->rect.y },
+							(vec2){ enemy->rect.x, enemy->rect.y },
 							dest
 						);
 						glm_vec2_normalize(dest);
@@ -380,8 +381,8 @@ enemies_attempt_weapon_fire(void)
 						//glm_vec2_scale(dest, 1.0, dest);
 						
 						spawn_bullet(
-							enemy->x,
-							enemy->y,
+							enemy->rect.x,
+							enemy->rect.y,
 							bullet1[0],
 							bullet1[1],
 							get_enemy_bullet_world(),
@@ -393,8 +394,8 @@ enemies_attempt_weapon_fire(void)
 							}
 						);
 						spawn_bullet(
-							enemy->x,
-							enemy->y,
+							enemy->rect.x,
+							enemy->rect.y,
 							bullet2[0],
 							bullet2[1],
 							get_enemy_bullet_world(),
@@ -406,8 +407,8 @@ enemies_attempt_weapon_fire(void)
 							}
 						);
 						spawn_bullet(
-							enemy->x,
-							enemy->y,
+							enemy->rect.x,
+							enemy->rect.y,
 							bullet3[0],
 							bullet3[1],
 							get_enemy_bullet_world(),
@@ -419,8 +420,8 @@ enemies_attempt_weapon_fire(void)
 							}
 						);
 						spawn_bullet(
-							enemy->x,
-							enemy->y,
+							enemy->rect.x,
+							enemy->rect.y,
 							bullet4[0],
 							bullet4[1],
 							get_enemy_bullet_world(),
@@ -434,7 +435,7 @@ enemies_attempt_weapon_fire(void)
 					}
 					else
 					{
-						i.ref->weapon.cooldown -= rodeo_frame_time_get()/1000.0f;
+						i.ref->weapon.cooldown -= rodeo_gfx_frame_time_get()/1000.0f;
 					}
 				}
 				break;
@@ -546,12 +547,12 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 		enemy->dy = direction[1];
 		*/
 		vec2 source = {
-			enemy->x,
-			enemy->y
+			enemy->rect.x,
+			enemy->rect.y
 		};
 		vec2 dest = {
-			target->x,
-			target->y
+			target->rect.x,
+			target->rect.y
 		};
 		vec2 direction;
 		glm_vec2_sub(dest, source, direction);
@@ -572,9 +573,9 @@ random_enemy_create(
 {
 	float spawn_coords[2];
 	cvec_collision_2d_world_item_value* p = get_player_position();
-	float player_coords[2] = {p->x, p->y};
-	float player_radius = p->height * 2 + 100;
-	for (int i = 0; i < 100; ++i) {
+	float player_coords[2] = {p->rect.x, p->rect.y};
+	float player_radius = p->rect.height * 2 + 100;
+	for (int i = 0; i < 10; ++i) {
 		spawn_coords[0] = (float)rodeo_random_double_get() * bounds.width + bounds.x;
 		spawn_coords[1] = (float)rodeo_random_double_get() * bounds.height + bounds.y;
 		float dist = glm_vec2_distance(spawn_coords, player_coords);
@@ -592,7 +593,7 @@ attempt_random_enemy_spawn(
 	rodeo_rectangle_t bounds
 )
 {
-	spawn_cooldown -= rodeo_frame_time_get();
+	spawn_cooldown -= rodeo_gfx_frame_time_get();
 	if (spawn_cooldown <= 0 && get_enemy_count() + get_ghost_count() <= 100) {
 		// faster spawning for testing
 		//spawn_cooldown += ((float)rodeo_random_double_get() * 15.0f) + 4.50f;

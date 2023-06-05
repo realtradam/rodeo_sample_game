@@ -17,7 +17,7 @@ void draw_debug_text(cstr renderer_name, float fps_display)
 			2,
 			2,
 			" frame count: %"PRIu64" ",
-			rodeo_frame_count_get()
+			rodeo_gfx_frame_count_get()
 		);
 
 		rodeo_debug_text_draw(
@@ -46,5 +46,13 @@ void draw_debug_text(cstr renderer_name, float fps_display)
 			6,
 			" total count: %d ",
 			get_ghost_count() + get_enemy_count()
+		);
+
+		rodeo_debug_text_draw(
+			2,
+			7,
+			" res: %"PRIu16"x%"PRIu16" ",
+			rodeo_window_screen_width_get(),
+			rodeo_window_screen_height_get()
 		);
 }

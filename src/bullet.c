@@ -5,8 +5,8 @@
 #include "wall.h"
 #include "rodeo/collision.h"
 
-static rodeo_texture_2d_t bullet_texture;
-static rodeo_audio_sound_t *pop_sound;
+static rodeo_gfx_texture_2d_t bullet_texture;
+static rodeo_audio_sound_t pop_sound;
 //static rodeo_collision_2d_world_t bullet_collision_world;
 static rodeo_collision_2d_world_t player_bullet_collision_world = {0};
 static rodeo_collision_2d_world_t enemy_bullet_collision_world = {0};
@@ -15,14 +15,14 @@ static cvec_bullet_t bullets = {0};
 void
 init_bullets(void)
 {
-	bullet_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
+	bullet_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
 	pop_sound = rodeo_audio_sound_create_from_path(cstr_lit("assets/pop.wav"));
 }
 
 void
 deinit_bullets(void)
 {
-	rodeo_texture_2d_destroy(&bullet_texture);
+	rodeo_gfx_texture_2d_destroy(bullet_texture);
 	rodeo_audio_sound_destroy(pop_sound);
 	rodeo_collision_2d_world_destroy(&player_bullet_collision_world);
 	rodeo_collision_2d_world_destroy(&enemy_bullet_collision_world);
@@ -54,12 +54,14 @@ spawn_bullet(
 	bullet.id = rodeo_collision_2d_world_item_create(
 		bullet_world,
 		(rodeo_collision_2d_world_item_t){
-			.x = x,
-			.y = y,
+			.rect = {
+				.x = x,
+				.y = y,
+				.width = 25.0f,
+				.height = 25.0f
+			},
 			.dx = dx,
 			.dy = dy,
-			.width = 25.0f,
-			.height = 25.0f
 		}
 	)->id;
 	return cvec_bullet_t_push(
@@ -73,13 +75,13 @@ move_bullets(void)
 {
 	c_foreach(i, cvec_collision_2d_world_item, player_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
-		bullet->x += bullet->dx;
-		bullet->y += bullet->dy;
+		bullet->rect.x += bullet->dx;
+		bullet->rect.y += bullet->dy;
 	}
 	c_foreach(i, cvec_collision_2d_world_item, enemy_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
-		bullet->x += bullet->dx;
-		bullet->y += bullet->dy;
+		bullet->rect.x += bullet->dx;
+		bullet->rect.y += bullet->dy;
 	}
 
 }
@@ -103,41 +105,31 @@ draw_bullets(void)
 	c_foreach(i, cvec_collision_2d_world_item, player_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
 		bullet_t *bullet_obj = get_bullet_by_id(i.ref->id);
-		   rodeo_texture_2d_draw(
-				&(rodeo_rectangle_t){
-					.x = bullet->x,
-					.y = bullet->y,
-					.width = bullet->width,
-					.height = bullet->height,
-				},
-				&(rodeo_rectangle_t){
+		   rodeo_gfx_texture_2d_draw(
+				bullet->rect,
+				(rodeo_rectangle_t){
 					.x = 0,
 					.y = 0,
 					.width = 25,
 					.height = 25
 				},
-				&bullet_obj->color,
-				&bullet_texture
+				bullet_obj->color,
+				bullet_texture
 				);
 	   }
 	c_foreach(i, cvec_collision_2d_world_item, enemy_bullet_collision_world) {
 		cvec_collision_2d_world_item_value *bullet = i.ref;
 		bullet_t *bullet_obj = get_bullet_by_id(i.ref->id);
-		   rodeo_texture_2d_draw(
-				&(rodeo_rectangle_t){
-					.x = bullet->x,
-					.y = bullet->y,
-					.width = bullet->width,
-					.height = bullet->height,
-				},
-				&(rodeo_rectangle_t){
+		   rodeo_gfx_texture_2d_draw(
+				bullet->rect,
+				(rodeo_rectangle_t){
 					.x = 0,
 					.y = 0,
 					.width = 25,
 					.height = 25
 				},
-				&bullet_obj->color,
-				&bullet_texture
+				bullet_obj->color,
+				bullet_texture
 				);
 	   }
 }

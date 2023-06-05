@@ -11,7 +11,7 @@ struct
 		uint32_t width;
 		uint32_t height;
 		uint32_t count;
-		rodeo_texture_2d_t *texture;
+		rodeo_gfx_texture_2d_t texture;
 	} config;
 }
 sprite_t;

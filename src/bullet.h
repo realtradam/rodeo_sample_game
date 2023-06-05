@@ -1,7 +1,6 @@
 #pragma once
 
 #include "rodeo.h"
-#include "rodeo/collision.h"
 
 typedef
 struct

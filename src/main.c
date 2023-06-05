@@ -20,14 +20,14 @@ float fps_display;
 void
 main_loop(void)
 {
-	if(rodeo_frame_count_get() % 10 == 0)
+	if(rodeo_gfx_frame_count_get() % 10 == 0)
 	{
-		fps_display = rodeo_frame_perSecond_get();
+		fps_display = rodeo_gfx_frame_perSecond_get();
 	}
 
-
-	mrodeo_frame_do()
+	mrodeo_gfx_frame_do()
 	{
+		rodeo_input_poll();
 		if (get_player_hp() > 0 && get_menu_state() == menu_state_inactive)
 		{
 			// retrieve and apply player input
@@ -75,40 +75,42 @@ main_loop(void)
 		}
 		draw_menu();
 
-		/*draw_debug_text(
-			renderer_name,
-			fps_display
-		);*/
-
 	}
+	draw_debug_text(renderer_name, fps_display);
 }
 
-int
+	int
 main(void)
 {
 	inputs_register_do()
 	{
 		mrodeo_window_do(window_height, window_width, cstr_lit("Bubbles, Behind"))
 		{
-			renderer_name = rodeo_renderer_name_get();
-			rodeo_frame_limit_set(60);
-
-			game_systems_init_do()
+			mrodeo_gfx_do()
 			{
-				// use to test manually spawning enemies
-				//spawn_enemy(400.0f,700.0f);
-				//spawn_enemy(900.0f,700.0f);
-				//spawn_enemy(400.0f,100.0f);
-				//spawn_enemy(900.0f,100.0f);
-				//for(int i = 0; i < 1500; ++i)
-				//{
-				//	float rng1 = ((float)rodeo_random_double_get() * 100) + 150;
-				//	float rng2 = ((float)rodeo_random_double_get() * 100) + 150;
-				//	spawn_ghost(rng1,rng2);
-				//}
-				rodeo_mainLoop_run(
-						main_loop
-						);
+				mrodeo_audio_do(8)
+				{
+					renderer_name = rodeo_gfx_renderer_name_get();
+					//rodeo_gfx_frame_limit_set(60);
+
+					game_systems_init_do()
+					{
+						// use to test manually spawning enemies
+						//spawn_enemy(400.0f,700.0f);
+						//spawn_enemy(900.0f,700.0f);
+						//spawn_enemy(400.0f,100.0f);
+						//spawn_enemy(900.0f,100.0f);
+						//for(int i = 0; i < 1500; ++i)
+						//{
+						//	float rng1 = ((float)rodeo_random_double_get() * 100) + 150;
+						//	float rng2 = ((float)rodeo_random_double_get() * 100) + 150;
+						//	spawn_ghost(rng1,rng2);
+						//}
+						rodeo_mainLoop_run(
+								main_loop
+								);
+					}
+				}
 			}
 		}
 	}

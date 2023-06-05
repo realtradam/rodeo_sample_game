@@ -14,10 +14,10 @@
 struct player_t
 {
 	sprite_t sprite;
-	rodeo_texture_2d_t texture;
-	rodeo_texture_2d_t shadow_texture;
-	rodeo_texture_2d_t aim_texture;
-	rodeo_texture_2d_t heart_texture;
+	rodeo_gfx_texture_2d_t texture;
+	rodeo_gfx_texture_2d_t shadow_texture;
+	rodeo_gfx_texture_2d_t aim_texture;
+	rodeo_gfx_texture_2d_t heart_texture;
 	int32_t hp;
 	float damage_timer; //ms
 	float damage_cooldown_rate;
@@ -33,7 +33,7 @@ struct player_t
 player = { 0 };
 
 typedef struct player_t player_t;
-static rodeo_audio_sound_t *bubbles_sound;
+static rodeo_audio_sound_t bubbles_sound;
 
 // 0-19 jumping
 // 61 standing
@@ -48,23 +48,25 @@ void
 init_player(void)
 {
 	bubbles_sound = rodeo_audio_sound_create_from_path(cstr_lit("assets/blowing_bubbles.wav"));
-	player.texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
-	player.shadow_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/blobshadow.png"));
-	player.aim_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
-	player.heart_texture = rodeo_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
-	player.sprite.config.texture = &player.texture;
+	player.texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/mainblob-128.png"));
+	player.shadow_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/blobshadow.png"));
+	player.aim_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
+	player.heart_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
+	player.sprite.config.texture = player.texture;
 	//player_collision_world = rodeo_collision_2d_world_create();
 	player_collision_world = (rodeo_collision_2d_world_t){0};
 	player.collision_id = rodeo_collision_2d_world_item_create(
 		&player_collision_world,
 		(rodeo_collision_2d_world_item_t){
-			.width = orc_size[0],
-			.height = orc_size[1]
+			.rect = {
+				.width = orc_size[0],
+				.height = orc_size[1]
+			}
 		}
 	)->id;
 	player.sprite = (sprite_t){
 	.config = {
-		.texture = &player.texture,
+		.texture = player.texture,
 		.width = 128,
 		.height = 128,
 		.count = 61
@@ -79,7 +81,7 @@ init_player(void)
 void
 deinit_player(void)
 {
-	rodeo_texture_2d_destroy(&player.texture);
+	rodeo_gfx_texture_2d_destroy(player.texture);
 	rodeo_collision_2d_world_destroy(&player_collision_world);
 	//player_collision_world = (rodeo_collision_2d_world_t){0};
 	rodeo_audio_sound_destroy(bubbles_sound);
@@ -95,8 +97,8 @@ reset_player(void)
 	cvec_collision_2d_world_item_value *player_position = get_player_position();
 	player_position->dx = 0;
 	player_position->dy = 0;
-	player_position->x = 630.0f;
-	player_position->y = 263.0f;
+	player_position->rect.x = 630.0f;
+	player_position->rect.y = 263.0f;
 	player.weapon.cooldown = 0;
 }
 
@@ -104,28 +106,28 @@ void
 draw_player(void)
 {
 	float transparency = 1.0f;
-	if(!(player.damage_timer >= player.damage_cooldown_rate || (rodeo_frame_count_get() % 8 < 4)))
+	if(!(player.damage_timer >= player.damage_cooldown_rate || (rodeo_gfx_frame_count_get() % 8 < 4)))
 	{
 		transparency = 0.33f;
 	}
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
 	const float scale = 0.25f;
 	draw_aim(aim_position.x, aim_position.y, scale);
-	rodeo_texture_2d_draw(
-		&(rodeo_rectangle_t){
-			.x = player_position->x,// - ((float)sprite->config.width * scale / 2),
-			.y = player_position->y + (96 * scale),// - ((float)sprite->config.height * scale / 2),
+	rodeo_gfx_texture_2d_draw(
+		(rodeo_rectangle_t){
+			.x = player_position->rect.x,// - ((float)sprite->config.width * scale / 2),
+			.y = player_position->rect.y + (96 * scale),// - ((float)sprite->config.height * scale / 2),
 			.width = 128 * scale,
 			.height = (13.0f / 30.0f * 128.0f) * scale,
 		},
-		&(rodeo_rectangle_t){ 
+		(rodeo_rectangle_t){ 
 			.width = 30,
 			.height = 13
 		},
-		&(rodeo_color_RGBAFloat_t){ .array = { 1.0f, 1.0f, 1.0f, 1.0f } },
-		&player.shadow_texture
+		(rodeo_color_RGBAFloat_t){ .array = { 1.0f, 1.0f, 1.0f, 1.0f } },
+		player.shadow_texture
 	);
-	draw_sprite(&player.sprite, player_position->x, player_position->y, scale, (rodeo_color_RGBAFloat_t){ .array = {1,1,1,transparency} });
+	draw_sprite(&player.sprite, player_position->rect.x, player_position->rect.y, scale, (rodeo_color_RGBAFloat_t){ .array = {1,1,1,transparency} });
 }
 
 void
@@ -139,11 +141,11 @@ draw_hp_bar(void)
 				"%f\n",
 				10.0f + (40.0f * (float)i)
 				);*/
-		rodeo_texture_2d_draw(
-				&(rodeo_rectangle_t){ .x = 10.0f + (40.0f * (float)i), .y = 10, .width = 35, .height = 35 },
-				&(rodeo_rectangle_t){ .x = 0, .y = 0, .width = 35, .height = 35 },
-				NULL,
-				&player.heart_texture);
+		rodeo_gfx_texture_2d_draw(
+				(rodeo_rectangle_t){ .x = 10.0f + (40.0f * (float)i), .y = 10, .width = 35, .height = 35 },
+				(rodeo_rectangle_t){ .x = 0, .y = 0, .width = 35, .height = 35 },
+				(rodeo_color_RGBAFloat_t){.array = {1,1,1,1}},
+				player.heart_texture);
 	}
 }
 
@@ -168,8 +170,8 @@ parse_player_input(void)
 		{
 			glm_vec2_normalize(inputs);
 		}
-		player_position->dx = inputs[0] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
-		player_position->dy = inputs[1] * (rodeo_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
+		player_position->dx = inputs[0] * (rodeo_gfx_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
+		player_position->dy = inputs[1] * (rodeo_gfx_frame_time_get() / (1000.0f/60.0f) * ((60.0f - (float)player.sprite.iter) / 60.0f)) * 7;
 
 		if(((inputs[0] != 0) || (inputs[1] != 0)) && player.move_state == mv_state_standing)
 		{
@@ -187,7 +189,7 @@ move_player(void)
 {
 	if(player.move_state != mv_state_standing)
 	{
-		player.sprite.iter += 1 * rodeo_frame_time_get() / (1000.0f/60.0f);
+		player.sprite.iter += 1 * rodeo_gfx_frame_time_get() / (1000.0f/60.0f);
 		player.sprite.iter = fmodf(player.sprite.iter, (float)player.sprite.config.count);
 		if(player.sprite.iter > 19)
 		{
@@ -204,9 +206,9 @@ move_player(void)
 	}
 
 	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
-	player_position->x += player_position->dx;
+	player_position->rect.x += player_position->dx;
 	player_position->dx = 0;
-	player_position->y += player_position->dy;
+	player_position->rect.y += player_position->dy;
 	player_position->dy = 0;
 	update_aim_position();
 }
@@ -217,7 +219,7 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 
 	if(player.weapon.cooldown > 0)
 	{
-		player.weapon.cooldown -= rodeo_frame_time_get() / 1000;
+		player.weapon.cooldown -= rodeo_gfx_frame_time_get() / 1000;
 	}
 	if(player.move_state == mv_state_mid_air)
 	{
@@ -230,7 +232,7 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 
 		glm_vec2_sub(
 				(vec2){aim_position.x, aim_position.y},
-				(vec2){player_position->x, player_position->y},
+				(vec2){player_position->rect.x, player_position->rect.y},
 				direction_vec
 				);
 		glm_vec2_normalize(direction_vec);
@@ -251,8 +253,8 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 		glm_vec2_scale(result_vec, 5.0f, result_vec);
 
 		spawn_bullet(
-				(float)player_position->x + (orc_size[0] / 2.0f) - 9.0f,
-				(float)player_position->y + (orc_size[1] / 2.0f) - 16.0f,
+				(float)player_position->rect.x + (orc_size[0] / 2.0f) - 9.0f,
+				(float)player_position->rect.y + (orc_size[1] / 2.0f) - 16.0f,
 				(float)(result_vec[0]),
 				(float)(result_vec[1]),
 				//(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
@@ -327,7 +329,7 @@ void player_bullet_resolver(
 void
 detect_player_enemy_collisions(void)
 {
-	player.damage_timer += rodeo_frame_time_get();
+	player.damage_timer += rodeo_gfx_frame_time_get();
 	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemies_world(), player_enemy_resolver);
 	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemy_bullet_world(), player_bullet_resolver);
 }
@@ -348,7 +350,7 @@ void
 update_aim_position(void)
 {
 	cvec_collision_2d_world_item_value *player_position = get_player_position();
-	vec2 player_position_vec = { player_position->x, player_position->y };
+	vec2 player_position_vec = { player_position->rect.x, player_position->rect.y };
 	vec2 aim_position_vec = { aim_position.x, aim_position.y };
 	float distance = glm_vec2_distance2(player_position_vec, aim_position_vec);
 	// move towards player
@@ -367,20 +369,20 @@ update_aim_position(void)
 void
 draw_aim(float player_x, float player_y, float scale)
 {
-	rodeo_texture_2d_draw(
-			&(rodeo_rectangle_t){
+	rodeo_gfx_texture_2d_draw(
+			(rodeo_rectangle_t){
 				//.x = player_x - (((128.0f * scale) * 1.3f) - (128.0f * scale) ),
 				.x = player_x - (((128.0f * scale) * 0.6f) / 2),
 				.y = player_y + ((((44.0f) * scale) * 0.6f) / 2) + (80.0f * scale),
 				.width = (128 * scale) * 1.6f,
 				.height = (44 * scale) * 1.6f,
 			},
-			&(rodeo_rectangle_t){
+			(rodeo_rectangle_t){
 				.width = 128,
 				.height = 44,
 			},
-			&(rodeo_color_RGBAFloat_t){ .array = {0.9f,0.9f,0.9f,1.0} },
-			&player.aim_texture
+			(rodeo_color_RGBAFloat_t){ .array = {0.9f,0.9f,0.9f,1.0} },
+			player.aim_texture
 		);
 }
 
