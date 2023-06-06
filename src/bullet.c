@@ -15,8 +15,8 @@ static cvec_bullet_t bullets = {0};
 void
 init_bullets(void)
 {
-	player_bullet_collision_world = rodeo_collision_2d_collection_create();
-	enemy_bullet_collision_world = rodeo_collision_2d_collection_create();
+	player_bullet_collision_world = rodeo_collision_2d_collection_create(50);
+	enemy_bullet_collision_world = rodeo_collision_2d_collection_create(150);
 	bullet_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/bullet.png"));
 	pop_sound = rodeo_audio_sound_create_from_path(cstr_lit("assets/pop.wav"));
 }

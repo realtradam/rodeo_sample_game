@@ -53,7 +53,7 @@ init_player(void)
 	player.aim_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
 	player.heart_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
 	player.sprite.config.texture = player.texture;
-	player_collision_collection = rodeo_collision_2d_collection_create();
+	player_collision_collection = rodeo_collision_2d_collection_create(1);
 	player.item = rodeo_collision_2d_item_create(
 		player_collision_collection,
 		(rodeo_collision_2d_item_data_t){

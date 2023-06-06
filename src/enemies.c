@@ -20,8 +20,8 @@ static uint32_t ghost_count = 0;
 void
 init_enemies(void)
 {
-	collision_enemies_collection = rodeo_collision_2d_collection_create();
-	collision_ghosts_collection = rodeo_collision_2d_collection_create();
+	collision_enemies_collection = rodeo_collision_2d_collection_create(50);
+	collision_ghosts_collection = rodeo_collision_2d_collection_create(50);
 	//enemies = cvec_enemy_t_init();
 	//squid_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/squid.png"));
 	//hinotamatchi_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/hinotamatchi.png"));
