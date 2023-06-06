@@ -5,12 +5,12 @@
 #include "bullet.h"
 #include "wall.h"
 
-static rodeo_collision_2d_world_t collision_enemies_world = {0};
-static rodeo_collision_2d_world_t collision_ghosts_world = {0};
+static rodeo_collision_2d_collection_t collision_enemies_collection = {0};
+static rodeo_collision_2d_collection_t collision_ghosts_collection = {0};
 //static rodeo_gfx_texture_2d_t hinotamatchi_texture;
 //static rodeo_gfx_texture_2d_t amonghost_texture;
 //static rodeo_gfx_texture_2d_t squid_texture;
-static rodeo_gfx_texture_2d_t enemy_texture;
+static rodeo_gfx_texture_2d_t enemy_texture = {0};
 static cvec_enemy_t enemies = {0};
 static cvec_enemy_t ghosts = {0};
 static float spawn_cooldown = 0;
@@ -20,7 +20,8 @@ static uint32_t ghost_count = 0;
 void
 init_enemies(void)
 {
-	//collision_enemies_world = rodeo_collision_2d_world_create();
+	collision_enemies_collection = rodeo_collision_2d_collection_create();
+	collision_ghosts_collection = rodeo_collision_2d_collection_create();
 	//enemies = cvec_enemy_t_init();
 	//squid_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/squid.png"));
 	//hinotamatchi_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/hinotamatchi.png"));
@@ -31,8 +32,8 @@ init_enemies(void)
 void
 deinit_enemies(void)
 {
-	rodeo_collision_2d_world_destroy(&collision_enemies_world);
-	rodeo_collision_2d_world_destroy(&collision_ghosts_world);
+	rodeo_collision_2d_collection_destroy(collision_enemies_collection);
+	rodeo_collision_2d_collection_destroy(collision_ghosts_collection);
 	cvec_enemy_t_drop(&enemies);
 	cvec_enemy_t_drop(&ghosts);
 	//rodeo_gfx_texture_2d_destroy(&hinotamatchi_texture);
@@ -71,7 +72,7 @@ spawn_enemy(float x, float y)
 {
 	uint64_t rng = rodeo_random_uint64_get();
 	cvec_enemy_t *obj_world = &enemies;
-	rodeo_collision_2d_world_t *collision_world = &collision_enemies_world;
+	rodeo_collision_2d_collection_t collision_world = collision_enemies_collection;
 
 	// debug to force specific enemies to spawn
 	//rng = (rng % 2) ? enemy_weapon_fourcross : enemy_weapon_none;
@@ -80,7 +81,7 @@ spawn_enemy(float x, float y)
 	if(rng % 3 == enemy_weapon_basic)
 	{
 		obj_world = &ghosts;
-		collision_world = &collision_ghosts_world;
+		collision_world = collision_ghosts_collection;
 		ghost_count++;
 	}
 	else
@@ -88,11 +89,16 @@ spawn_enemy(float x, float y)
 		enemy_count++;
 	}
 
-	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t)
+	rodeo_collision_2d_item_data_t collision = (rodeo_collision_2d_item_data_t)
 		{
-			.rect = { .x = x, .y = y, .width = 40, .height = 40 }
+			.rect = {
+				.x = x,
+				.y = y,
+				.width = 40,
+				.height = 40
+			}
 		};
-	world_id id = rodeo_collision_2d_world_item_create(collision_world, collision)->id;
+	rodeo_collision_2d_item_t item = rodeo_collision_2d_item_create(collision_world, collision);
 
 	return cvec_enemy_t_push(
 		obj_world,
@@ -105,7 +111,7 @@ spawn_enemy(float x, float y)
 			.type = rng % 3,
 			.cooldown = 0,
 			},
-			.id = id
+			.item = item
 		});
 }
 
@@ -114,14 +120,14 @@ spawn_ghost(float x, float y)
 {
 	uint64_t rng = rodeo_random_uint64_get();
 	cvec_enemy_t *obj_world = &enemies;
-	rodeo_collision_2d_world_t *collision_world = &collision_enemies_world;
+	rodeo_collision_2d_collection_t collision_world = collision_enemies_collection;
 	
 
 	rng = enemy_weapon_basic;
 	if(rng % 3 == enemy_weapon_basic)
 	{
 		obj_world = &ghosts;
-		collision_world = &collision_ghosts_world;
+		collision_world = collision_ghosts_collection;
 		ghost_count++;
 	}
 	else
@@ -129,11 +135,11 @@ spawn_ghost(float x, float y)
 		enemy_count++;
 	}
 
-	rodeo_collision_2d_world_item_t collision = (rodeo_collision_2d_world_item_t)
+	rodeo_collision_2d_item_data_t collision = (rodeo_collision_2d_item_data_t)
 	{
 		.rect = { .x = x, .y = y, .width = 40, .height = 40 }
 	};
-	world_id id = rodeo_collision_2d_world_item_create(collision_world, collision)->id;
+	rodeo_collision_2d_item_t item = rodeo_collision_2d_item_create(collision_world, collision);
 
 	return cvec_enemy_t_push(
 		obj_world,
@@ -146,16 +152,17 @@ spawn_ghost(float x, float y)
 			.type = rng % 3,
 			.cooldown = 0,
 			},
-			.id = id
+			.item = item
 		});
 }
 
 void
-draw_enemy(cvec_collision_2d_world_item_value *enemy)
+draw_enemy(rodeo_collision_2d_item_t enemy)
 {
 		rodeo_color_RGBAFloat_t color;
 
-		enemy_t *enemy_obj = get_enemy_by_id(enemy->id);
+		enemy_t *enemy_obj = get_enemy_by_id((*enemy.data_handle)->id);
+		if(enemy_obj == NULL) { return; }
 
 		switch(enemy_obj->weapon.type)
 		{
@@ -183,7 +190,7 @@ draw_enemy(cvec_collision_2d_world_item_value *enemy)
 		}
 
 		   rodeo_gfx_texture_2d_draw(
-				enemy->rect,
+				(*enemy.data_handle)->rect,
 				(rodeo_rectangle_t){
 					.x = 0 + (40 * (float)enemy_obj->weapon.type),
 					.y = 0,
@@ -199,18 +206,18 @@ draw_enemy(cvec_collision_2d_world_item_value *enemy)
 void
 draw_enemies(void)
 {
-	c_foreach(i, cvec_collision_2d_world_item, collision_enemies_world) {
-		draw_enemy(i.ref);
+	c_foreach(i, cvec_enemy_t, enemies) {
+		draw_enemy(i.ref->item);
 	}
-	c_foreach(i, cvec_collision_2d_world_item, collision_ghosts_world) {
-		draw_enemy(i.ref);
+	c_foreach(i, cvec_enemy_t, ghosts) {
+		draw_enemy(i.ref->item);
 	}
 }
 
 void
 enemy_overlap_resolver(
-	rodeo_collision_2d_world_item_t *a,
-	rodeo_collision_2d_world_item_t *b
+	rodeo_collision_2d_item_data_t *a,
+	rodeo_collision_2d_item_data_t *b
 )
 {
 	enemy_t *enemy_a = get_enemy_by_id(a->id);
@@ -238,10 +245,10 @@ void
 move_enemies(void)
 {	
   
-   rodeo_collision_2d_world_compare_self(get_enemies_world(), enemy_overlap_resolver);
-   rodeo_collision_2d_world_compare_self(get_ghosts_world(), enemy_overlap_resolver);
+   rodeo_collision_2d_collection_compare_self(get_enemies_world(), enemy_overlap_resolver);
+   rodeo_collision_2d_collection_compare_self(get_ghosts_world(), enemy_overlap_resolver);
 	c_foreach(i, cvec_enemy_t, enemies) {
-		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		rodeo_collision_2d_item_data_t *enemy = (*i.ref->item.data_handle);
 		if(enemy == NULL)
 		{
 			continue;
@@ -252,7 +259,7 @@ move_enemies(void)
 		enemy->dy = 0;
 	}
 	c_foreach(i, cvec_enemy_t, ghosts) {
-		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		rodeo_collision_2d_item_data_t *enemy = (*i.ref->item.data_handle);
 		if(enemy == NULL)
 		{
 			continue;
@@ -284,8 +291,8 @@ enemies_attempt_weapon_fire(void)
 					{
 						i.ref->weapon.cooldown += i.ref->weapon.firerate;
 						//weapon spawn logic
-						cvec_collision_2d_world_item_value *player = get_player_position();
-						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+						rodeo_collision_2d_item_data_t *player = get_player_position();
+						rodeo_collision_2d_item_data_t *enemy = (*i.ref->item.data_handle);
 						vec2 dest;
 						glm_vec2_sub(
 							(vec2){ player->rect.x, player->rect.y },
@@ -331,8 +338,8 @@ enemies_attempt_weapon_fire(void)
 					{
 						i.ref->weapon.cooldown += i.ref->weapon.firerate;
 						//weapon spawn logic
-						cvec_collision_2d_world_item_value *player = get_player_position();
-						cvec_collision_2d_world_item_value *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+						rodeo_collision_2d_item_data_t *player = get_player_position();
+						rodeo_collision_2d_item_data_t *enemy = (*i.ref->item.data_handle);
 						vec2 dest;
 						glm_vec2_sub(
 							(vec2){ player->rect.x, player->rect.y },
@@ -446,32 +453,32 @@ enemies_attempt_weapon_fire(void)
 
 enemy_t*
 get_enemy_by_id(
-    world_id id
+    rodeo_collision_2d_item_id_t id
 )
 {
 	cvec_enemy_t *enemy_vec = &enemies;
-	if (id.world == &collision_ghosts_world)
+	if (id.collection.data == collision_ghosts_collection.data)
 	{
 		enemy_vec = &ghosts;
 	}
 	c_foreach(i, cvec_enemy_t, *enemy_vec) {
-		if (i.ref->id.id == id.id) {
+		if (i.ref->item.data_handle == id.self_handle) {
 			return i.ref;
 		}
 	}
 	return NULL;
 }
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_enemies_world(void)
 {
-    return &collision_enemies_world;
+    return collision_enemies_collection;
 }
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_ghosts_world(void)
 {
-    return &collision_ghosts_world;
+    return collision_ghosts_collection;
 }
 
 cvec_enemy_t
@@ -484,6 +491,7 @@ void enemy_destroy(
 	cvec_enemy_t_value* enemy 
 )
 {
+	if (enemy == NULL) { return; }
 	cvec_enemy_t *enemy_vec = &enemies;
 	if(enemy->weapon.type == enemy_weapon_basic)
 	{
@@ -494,7 +502,7 @@ void enemy_destroy(
 	{
 		enemy_count--;
 	}
-	rodeo_collision_2d_world_item_destroy_by_id(enemy->id);
+	rodeo_collision_2d_item_destroy(enemy->item);
 	*enemy = *cvec_enemy_t_back(enemy_vec);
 	if(cvec_enemy_t_size(enemy_vec) > 0)
 	{
@@ -505,11 +513,12 @@ void enemy_destroy(
 
 void
 damage_enemy_resolver(
-	rodeo_collision_2d_world_item_t *enemy_collision,
-	rodeo_collision_2d_world_item_t *bullet_collision
+	rodeo_collision_2d_item_data_t *enemy_collision,
+	rodeo_collision_2d_item_data_t *bullet_collision
 )
 {
 	bullet_t *bullet = get_bullet_by_id(bullet_collision->id);
+	if(bullet == NULL) { return; }
 	bullet_destroy(bullet);
 	enemy_t *enemy = get_enemy_by_id(enemy_collision->id);
 	if(enemy == NULL) { return; }
@@ -522,18 +531,18 @@ damage_enemy_resolver(
 void
 detect_bullet_enemy_collisions(void)
 {
-	rodeo_collision_2d_world_compare_other(&collision_ghosts_world, get_player_bullet_world(), damage_enemy_resolver);
-	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_player_bullet_world(), damage_enemy_resolver);
+	rodeo_collision_2d_collection_compare_other(collision_ghosts_collection, get_player_bullet_world(), damage_enemy_resolver);
+	rodeo_collision_2d_collection_compare_other(collision_enemies_collection, get_player_bullet_world(), damage_enemy_resolver);
 }
 
 void
-group_follow_target(rodeo_collision_2d_world_item_t *target)
+group_follow_target(rodeo_collision_2d_item_t target)
 {
 	cvec_enemy_t enemy_arry[2] = { enemies, ghosts };
 	for(int32_t j = 0; j < 2; ++j)
 	{
 	c_foreach(i, cvec_enemy_t, enemy_arry[j]) {
-		rodeo_collision_2d_world_item_t *enemy = rodeo_collision_2d_world_item_get_by_id(i.ref->id);
+		rodeo_collision_2d_item_data_t *enemy = (*i.ref->item.data_handle);
 		/*
 		float direction[2] = {
 			target->x - enemy->x,
@@ -551,14 +560,16 @@ group_follow_target(rodeo_collision_2d_world_item_t *target)
 			enemy->rect.y
 		};
 		vec2 dest = {
-			target->rect.x,
-			target->rect.y
+			(*target.data_handle)->rect.x,
+			(*target.data_handle)->rect.y
 		};
 		vec2 direction;
 		glm_vec2_sub(dest, source, direction);
 		glm_vec2_normalize(direction);
 		vec2 result;
-		glm_vec2_scale(direction, get_enemy_by_id(enemy->id)->move_speed, result);
+		enemy_t *enemy_obj = get_enemy_by_id(enemy->id);
+		if(enemy_obj == NULL) { continue; }
+		glm_vec2_scale(direction, enemy_obj->move_speed, result);
 
 		enemy->dx = result[0];
 		enemy->dy = result[1];
@@ -572,7 +583,7 @@ random_enemy_create(
 )
 {
 	float spawn_coords[2];
-	cvec_collision_2d_world_item_value* p = get_player_position();
+	rodeo_collision_2d_item_data_t *p = get_player_position();
 	float player_coords[2] = {p->rect.x, p->rect.y};
 	float player_radius = p->rect.height * 2 + 100;
 	for (int i = 0; i < 10; ++i) {
@@ -606,5 +617,5 @@ attempt_random_enemy_spawn(
 void
 detect_enemy_wall_collisions(void)
 {
-	rodeo_collision_2d_world_compare_other(&collision_enemies_world, get_wall_world(), moving_wall_resolver);
+	rodeo_collision_2d_collection_compare_other(collision_enemies_collection, get_wall_world(), moving_wall_resolver);
 }

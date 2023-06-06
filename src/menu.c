@@ -97,7 +97,7 @@ parse_menu_input(void)
 		}
 		else if (menu_state == menu_state_main)
 		{
-			init_game_systems();
+			//init_game_systems();
 			menu_state = menu_state_inactive;
 		}
 	}

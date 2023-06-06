@@ -24,7 +24,7 @@ typedef
 struct
 {
     float hp;
-    world_id id;
+    rodeo_collision_2d_item_t item;
 	enemy_ai_behavior behavior;
 	float move_speed;
 	struct enemy_weapon
@@ -81,13 +81,13 @@ move_enemies(void);
 
 enemy_t*
 get_enemy_by_id(
-    world_id id
+    rodeo_collision_2d_item_id_t id
 );
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_enemies_world(void);
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_ghosts_world(void);
 
 cvec_enemy_t
@@ -101,7 +101,7 @@ void
 detect_bullet_enemy_collisions(void);
 
 void
-group_follow_target(rodeo_collision_2d_world_item_t *target);
+group_follow_target(rodeo_collision_2d_item_t target);
 
 enemy_t*
 random_enemy_create(

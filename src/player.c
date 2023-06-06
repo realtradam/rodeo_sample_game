@@ -21,7 +21,7 @@ struct player_t
 	int32_t hp;
 	float damage_timer; //ms
 	float damage_cooldown_rate;
-	world_id collision_id;
+	rodeo_collision_2d_item_t item;
 	move_state_t move_state;
 	struct player_weapon
 	{
@@ -39,7 +39,7 @@ static rodeo_audio_sound_t bubbles_sound;
 // 61 standing
 // 20-60 mid iar
 
-static rodeo_collision_2d_world_t player_collision_world = {0};
+static rodeo_collision_2d_collection_t player_collision_collection = {0};
 static aim_position_t aim_position;
 
 static float orc_size[] = {13.0f * 2.0f, 19.0f * 2.0f};
@@ -53,17 +53,16 @@ init_player(void)
 	player.aim_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/aim.png"));
 	player.heart_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/heart.png"));
 	player.sprite.config.texture = player.texture;
-	//player_collision_world = rodeo_collision_2d_world_create();
-	player_collision_world = (rodeo_collision_2d_world_t){0};
-	player.collision_id = rodeo_collision_2d_world_item_create(
-		&player_collision_world,
-		(rodeo_collision_2d_world_item_t){
+	player_collision_collection = rodeo_collision_2d_collection_create();
+	player.item = rodeo_collision_2d_item_create(
+		player_collision_collection,
+		(rodeo_collision_2d_item_data_t){
 			.rect = {
 				.width = orc_size[0],
 				.height = orc_size[1]
 			}
 		}
-	)->id;
+	);
 	player.sprite = (sprite_t){
 	.config = {
 		.texture = player.texture,
@@ -82,8 +81,8 @@ void
 deinit_player(void)
 {
 	rodeo_gfx_texture_2d_destroy(player.texture);
-	rodeo_collision_2d_world_destroy(&player_collision_world);
-	//player_collision_world = (rodeo_collision_2d_world_t){0};
+	rodeo_collision_2d_collection_destroy(player_collision_collection);
+	//player_collision_collection = (rodeo_collision_2d_world_t){0};
 	rodeo_audio_sound_destroy(bubbles_sound);
 }
 
@@ -94,7 +93,7 @@ reset_player(void)
 	player.hp = 100;
 	aim_position.x = 101;
 	aim_position.y = 100;
-	cvec_collision_2d_world_item_value *player_position = get_player_position();
+	rodeo_collision_2d_item_data_t *player_position = get_player_position();
 	player_position->dx = 0;
 	player_position->dy = 0;
 	player_position->rect.x = 630.0f;
@@ -110,7 +109,7 @@ draw_player(void)
 	{
 		transparency = 0.33f;
 	}
-	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+	rodeo_collision_2d_item_data_t *player_position = get_player_position();
 	const float scale = 0.25f;
 	draw_aim(aim_position.x, aim_position.y, scale);
 	rodeo_gfx_texture_2d_draw(
@@ -152,7 +151,7 @@ draw_hp_bar(void)
 void
 parse_player_input(void)
 {
-	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+	rodeo_collision_2d_item_data_t *player_position = get_player_position();
 	bool reset_movement = true;
 	units_move_up_input(NULL, &reset_movement);
 	units_move_down_input(NULL, &reset_movement);
@@ -205,7 +204,7 @@ move_player(void)
 		rodeo_audio_sound_play(bubbles_sound);
 	}
 
-	cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+	rodeo_collision_2d_item_data_t *player_position = get_player_position();
 	player_position->rect.x += player_position->dx;
 	player_position->dx = 0;
 	player_position->rect.y += player_position->dy;
@@ -214,7 +213,7 @@ move_player(void)
 }
 
 void
-player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
+player_shoot(rodeo_collision_2d_collection_t bullet_collision_world)
 {
 
 	if(player.weapon.cooldown > 0)
@@ -226,7 +225,7 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 	while(player.weapon.cooldown <= 0)
 	{
 		player.weapon.cooldown += player.weapon.firerate;
-		cvec_collision_2d_world_item_value *player_position = rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+		rodeo_collision_2d_item_data_t *player_position = get_player_position();
 
 		vec2 direction_vec;
 
@@ -267,8 +266,8 @@ player_shoot(rodeo_collision_2d_world_t *bullet_collision_world)
 	}
 
 void player_enemy_resolver(
-	rodeo_collision_2d_world_item_t *player_collision,
-	rodeo_collision_2d_world_item_t *enemy_collision
+	rodeo_collision_2d_item_data_t *player_collision,
+	rodeo_collision_2d_item_data_t *enemy_collision
 )
 {
 	if (player.hp <= 0) {
@@ -297,8 +296,8 @@ void player_enemy_resolver(
 }
 
 void player_bullet_resolver(
-	rodeo_collision_2d_world_item_t *player_collision,
-	rodeo_collision_2d_world_item_t *bullet_collision
+	rodeo_collision_2d_item_data_t *player_collision,
+	rodeo_collision_2d_item_data_t *bullet_collision
 )
 {
 	if (player.hp <= 0) {
@@ -330,26 +329,27 @@ void
 detect_player_enemy_collisions(void)
 {
 	player.damage_timer += rodeo_gfx_frame_time_get();
-	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemies_world(), player_enemy_resolver);
-	rodeo_collision_2d_world_compare_other(&player_collision_world, get_enemy_bullet_world(), player_bullet_resolver);
+	rodeo_collision_2d_collection_compare_other(player_collision_collection, get_enemies_world(), player_enemy_resolver);
+	rodeo_collision_2d_collection_compare_other(player_collision_collection, get_ghosts_world(), player_enemy_resolver);
+	rodeo_collision_2d_collection_compare_other(player_collision_collection, get_enemy_bullet_world(), player_bullet_resolver);
 }
 
 void
 detect_player_wall_collisions(void)
 {
-	rodeo_collision_2d_world_compare_other(&player_collision_world, get_wall_world(), moving_wall_resolver);
+	rodeo_collision_2d_collection_compare_other(player_collision_collection, get_wall_world(), moving_wall_resolver);
 }
 
-cvec_collision_2d_world_item_value *
+rodeo_collision_2d_item_data_t *
 get_player_position(void)
 {
-		return rodeo_collision_2d_world_item_get_by_id(player.collision_id);
+		return *player.item.data_handle;
 }
 
 void
 update_aim_position(void)
 {
-	cvec_collision_2d_world_item_value *player_position = get_player_position();
+	rodeo_collision_2d_item_data_t *player_position = get_player_position();
 	vec2 player_position_vec = { player_position->rect.x, player_position->rect.y };
 	vec2 aim_position_vec = { aim_position.x, aim_position.y };
 	float distance = glm_vec2_distance2(player_position_vec, aim_position_vec);

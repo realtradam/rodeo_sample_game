@@ -49,7 +49,11 @@ main_loop(void)
 		}
 
 		// run enemy movement ai
-		group_follow_target(get_player_position());
+		group_follow_target(
+			(rodeo_collision_2d_item_t){
+				.data_handle = get_player_position()->id.self_handle
+			}
+		);
 
 		detect_bullet_enemy_collisions();
 		detect_bullet_wall_collisions();

@@ -12,10 +12,10 @@ deinit_wall(void);
 		deinit_wall() \
 	)
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_wall_world(void);
 
-rodeo_collision_2d_world_item_t *
+rodeo_collision_2d_item_t
 new_wall(
     float x,
     float y,
@@ -31,8 +31,8 @@ coords_inside_wall(
 
 void
 moving_wall_resolver(
-	rodeo_collision_2d_world_item_t *obj_collision,
-	rodeo_collision_2d_world_item_t *wall_collision
+	rodeo_collision_2d_item_data_t *obj_collision,
+	rodeo_collision_2d_item_data_t *wall_collision
 );
 
 void

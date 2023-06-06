@@ -1,7 +1,7 @@
 #include "wall.h"
 #include "rodeo.h"
 
-static rodeo_collision_2d_world_t collision_wall_world;
+static rodeo_collision_2d_collection_t collision_wall_world;
 rodeo_gfx_texture_2d_t wall_texture;
 rodeo_gfx_texture_2d_t floor_texture;
 rodeo_gfx_texture_2d_t goat_texture;
@@ -16,7 +16,7 @@ init_wall(void)
 	logo_texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/tojam2023_tagline_header_clear.png"));
 	uint16_t window_width = 1600;
 	uint16_t window_height = 900;
-	collision_wall_world = rodeo_collision_2d_world_create();
+	collision_wall_world = rodeo_collision_2d_collection_create();
 	float walls[][4] = {
 		{0, -10, window_width, 10},
 		{0, window_height, window_width, 10},
@@ -46,20 +46,20 @@ init_wall(void)
 void
 deinit_wall(void)
 {
-	rodeo_collision_2d_world_destroy(&collision_wall_world);
+	rodeo_collision_2d_collection_destroy(collision_wall_world);
 	rodeo_gfx_texture_2d_destroy(wall_texture);
 	rodeo_gfx_texture_2d_destroy(floor_texture);
 	rodeo_gfx_texture_2d_destroy(goat_texture);
 	rodeo_gfx_texture_2d_destroy(logo_texture);
 }
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_wall_world(void)
 {
-	return &collision_wall_world;
+	return collision_wall_world;
 }
 
-rodeo_collision_2d_world_item_t *
+rodeo_collision_2d_item_t
 new_wall(
     float x,
     float y,
@@ -67,9 +67,9 @@ new_wall(
     float height
 )
 {
-	return rodeo_collision_2d_world_item_create(
-			&collision_wall_world,
-			(rodeo_collision_2d_world_item_t)
+	return rodeo_collision_2d_item_create(
+			collision_wall_world,
+			(rodeo_collision_2d_item_data_t)
 			{
 				.rect = {
 					.x = x,
@@ -86,7 +86,8 @@ coords_inside_wall(
     float y
 )
 {
-	c_foreach(i, cvec_collision_2d_world_item, collision_wall_world) {
+	
+	c_foreach(i, cvec_collision_2d_item_data, collision_wall_world.data->collection) {
 		if (x >= i.ref->rect.x && x <= i.ref->rect.x + i.ref->rect.width &&
 				y >= i.ref->rect.y && y <= i.ref->rect.y + i.ref->rect.height) {
 			return true;
@@ -97,12 +98,12 @@ coords_inside_wall(
 
 void
 moving_wall_resolver(
-	rodeo_collision_2d_world_item_t *obj_collision,
-	rodeo_collision_2d_world_item_t *wall_collision
+	rodeo_collision_2d_item_data_t *obj_collision,
+	rodeo_collision_2d_item_data_t *wall_collision
 )
 {
-	rodeo_collision_2d_world_item_t *p = obj_collision;
-	rodeo_collision_2d_world_item_t *w = wall_collision;
+	rodeo_collision_2d_item_data_t *p = obj_collision;
+	rodeo_collision_2d_item_data_t *w = wall_collision;
 	rodeo_rectangle_t step = {
 		.x = p->rect.x + p->dx * rodeo_gfx_frame_time_get() / (1000.0f/60.0f),
 		.y = p->rect.y + p->dy * rodeo_gfx_frame_time_get() / (1000.0f/60.0f),

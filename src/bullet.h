@@ -5,7 +5,7 @@
 typedef
 struct
 {
-	world_id id;
+	rodeo_collision_2d_item_t item;
 	rodeo_color_RGBAFloat_t color;
 }
 bullet_t;
@@ -35,7 +35,7 @@ spawn_bullet(
 	float y,
 	float dx,
 	float dy,
-	rodeo_collision_2d_world_t *bullet_world,
+	rodeo_collision_2d_collection_t bullet_world,
 	rodeo_color_RGBAFloat_t color
 );
 
@@ -44,16 +44,16 @@ move_bullets(void);
 
 bullet_t*
 get_bullet_by_id(
-	world_id id
+	rodeo_collision_2d_item_id_t id
 );
 
 void
 draw_bullets(void);
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_enemy_bullet_world(void);
 
-rodeo_collision_2d_world_t *
+rodeo_collision_2d_collection_t
 get_player_bullet_world(void);
 
 void
