@@ -80,7 +80,7 @@ main_loop(void)
 		draw_menu();
 
 	}
-	draw_debug_text(renderer_name, fps_display);
+	//draw_debug_text(renderer_name, fps_display);
 }
 
 	int
@@ -90,7 +90,7 @@ main(void)
 	{
 		mrodeo_window_do(window_height, window_width, cstr_lit("Bubbles, Behind"))
 		{
-			mrodeo_gfx_do()
+			mrodeo_gfx_do(1600, 900)
 			{
 				mrodeo_audio_do(8)
 				{

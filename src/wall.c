@@ -160,6 +160,15 @@ draw_level(void)
 	rodeo_rectangle_t logo_dest = (rodeo_rectangle_t){1600-(1024*0.25f),10,1024*0.25f,400*0.25f};
 	rodeo_rectangle_t goat_size = (rodeo_rectangle_t){0,0,529,1038};
 	rodeo_rectangle_t goat_dest = (rodeo_rectangle_t){(1600.0f/2)-(529.0f/2*0.07f),(900.0f/2)-(1038.0f/2*0.07f),529*0.07f,1038*0.07f};
+	rodeo_gfx_rectangle_draw(
+		rect,
+		(rodeo_color_RGBAFloat_t){
+			.colors.red = 0.267f,
+			.colors.green = 0.2f,
+			.colors.blue = 0.333f,
+			.colors.alpha = 1.0f
+		}
+	);
 	rodeo_gfx_texture_2d_draw(rect, rect, (rodeo_color_RGBAFloat_t){ .array = {0.96f, 0.41f, 0.1f, 1.0f} }, wall_texture);
 	rodeo_gfx_texture_2d_draw(rect, rect, (rodeo_color_RGBAFloat_t){ .array = {0.52f, 0.31f, 0.73f, 0.33f} }, floor_texture);
 	rodeo_gfx_texture_2d_draw(goat_dest, goat_size, (rodeo_color_RGBAFloat_t){ .array = {1,1,1,1} }, goat_texture);
