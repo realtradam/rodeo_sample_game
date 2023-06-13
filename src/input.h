@@ -4,15 +4,15 @@
 typedef
 struct
 {
-	rodeo_input_scene_t *scene;
-	rodeo_input_command_t *create;
-	rodeo_input_command_t *left;
-	rodeo_input_command_t *right;
-	rodeo_input_command_t *up;
-	rodeo_input_command_t *down;
-	rodeo_input_command_t *play_sound;
-	rodeo_input_command_t *play_sound2;
-	rodeo_input_command_t *play_sound3;
+	rodeo_input_scene_t scene;
+	rodeo_input_command_t create;
+	rodeo_input_command_t left;
+	rodeo_input_command_t right;
+	rodeo_input_command_t up;
+	rodeo_input_command_t down;
+	rodeo_input_command_t play_sound;
+	rodeo_input_command_t play_sound2;
+	rodeo_input_command_t play_sound3;
 }
 scenes_and_commands_t;
 
