@@ -30,7 +30,7 @@ uint16_t num_of_units = 0;
 
 const rodeo_color_RGBAFloat_t black_clear =
 { 
-	.colors.red = 0.0f, .colors.green = 0.0f, .colors.blue = 0.0f,
+	.colors.red = 0.1f, .colors.green = 0.1f, .colors.blue = 0.1f,
 	.colors.alpha = 0.75f
 };
 const rodeo_color_RGBAFloat_t red =
@@ -93,8 +93,8 @@ summon_units(void)
 				(float)summon_position.y - (orc_size[1] / 2.0f)
 			} };
 			units[num_of_units - 1][1] = (rodeo_vector2_t){ {
-				(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5),
-					(float)((int8_t)(rodeo_random_uint64_get() % 10) - 5)
+				(float)((int8_t)(irodeo_math_rng_uint64_get_default() % 10) - 5),
+					(float)((int8_t)(irodeo_math_rng_uint64_get_default() % 10) - 5)
 			} };
 		}
 	}
@@ -324,84 +324,79 @@ main_loop(void)
 int
 main(void)
 {
-	register_inputs();
-	
-	rodeo_log(
-		rodeo_logLevel_info,
-		"Testing logging... It seems to work!"
-	);
-	rodeo_log(
-		rodeo_logLevel_warning,
-		"Testing warning log level... It seems to work!"
-	);
-	rodeo_log(
-		rodeo_logLevel_error,
-		"Testing error log level... It seems to work!"
-	);
-	mrodeo_window_do(480, 640, cstr_lit("Rodeo Window"))
+	register_inputs_do()
 	{
-		mrodeo_audio_do(4)
+		
+		rodeo_log(
+			rodeo_logLevel_info,
+			"Testing logging... It seems to work!"
+		);
+		rodeo_log(
+			rodeo_logLevel_warning,
+			"Testing warning log level... It seems to work!"
+		);
+		rodeo_log(
+			rodeo_logLevel_error,
+			"Testing error log level... It seems to work!"
+		);
+		mrodeo_do(480, 640, cstr_lit("Rodeo Window"), 4)
 		{
-			mrodeo_gfx_do(480, 640)
-			{
-				renderer = rodeo_gfx_renderer_name_get();
-				rodeo_gfx_frame_limit_set(60);
+			renderer = rodeo_gfx_renderer_name_get();
+			rodeo_gfx_frame_limit_set(60);
 
-				//texture = rodeo_texture_2d_create_from_RGBA8(
-				//	2,
-				//	2,
-				//	texture_memory
-				//);
-				
-				world_orc = rodeo_collision_2d_collection_create(1);
-				world_other = rodeo_collision_2d_collection_create(2);
+			//texture = rodeo_texture_2d_create_from_RGBA8(
+			//	2,
+			//	2,
+			//	texture_memory
+			//);
+			
+			world_orc = rodeo_collision_2d_collection_create(1);
+			world_other = rodeo_collision_2d_collection_create(2);
 
-				rodeo_collision_2d_item_data_t orc_collision_params = {
-					.rect = {
-						.x = summon_position.x,
-						.y = summon_position.y,
-						.width = orc_size[0],
-						.height = orc_size[1]
-					}
-				};
-				orc_collision_id = (*rodeo_collision_2d_item_create(world_orc, orc_collision_params).data_handle)->id;
-				
-				rodeo_collision_2d_item_data_t test_collision_params = {
-					.rect = {
-						.x = 320,
-						.y = 240,
-						.width = orc_size[0],
-						.height = orc_size[1]
-					}
-				};
-				box_collision_ids[0] = (*rodeo_collision_2d_item_create(world_orc, test_collision_params).data_handle)->id;
-				rodeo_collision_2d_item_data_t test2_collision_params = {
-					.rect = {
-						.x = 0,
-						.y = 240,
-						.width = orc_size[0],
-						.height = orc_size[1]
-					}
-				};
-				box_collision_ids[1] = (*rodeo_collision_2d_item_create(world_orc, test2_collision_params).data_handle)->id;
+			rodeo_collision_2d_item_data_t orc_collision_params = {
+				.rect = {
+					.x = summon_position.x,
+					.y = summon_position.y,
+					.width = orc_size[0],
+					.height = orc_size[1]
+				}
+			};
+			orc_collision_id = (*rodeo_collision_2d_item_create(world_orc, orc_collision_params).data_handle)->id;
+			
+			rodeo_collision_2d_item_data_t test_collision_params = {
+				.rect = {
+					.x = 320,
+					.y = 240,
+					.width = orc_size[0],
+					.height = orc_size[1]
+				}
+			};
+			box_collision_ids[0] = (*rodeo_collision_2d_item_create(world_orc, test_collision_params).data_handle)->id;
+			rodeo_collision_2d_item_data_t test2_collision_params = {
+				.rect = {
+					.x = 0,
+					.y = 240,
+					.width = orc_size[0],
+					.height = orc_size[1]
+				}
+			};
+			box_collision_ids[1] = (*rodeo_collision_2d_item_create(world_orc, test2_collision_params).data_handle)->id;
 
-				texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
-				//scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
-				//music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
+			texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+			//scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
+			//music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
 
-				rodeo_mainLoop_run(
-					main_loop
-				);
+			rodeo_mainLoop_run(
+				main_loop
+			);
 
-				rodeo_gfx_texture_2d_destroy(texture);
-				rodeo_collision_2d_collection_destroy(world_orc);
-				rodeo_collision_2d_collection_destroy(world_other);
+			rodeo_gfx_texture_2d_destroy(texture);
+			rodeo_collision_2d_collection_destroy(world_orc);
+			rodeo_collision_2d_collection_destroy(world_other);
 
-			}
 		}
-	}
 
-	unregister_inputs();
+	}
 
 	return 0;
 }

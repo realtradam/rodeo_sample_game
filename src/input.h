@@ -1,4 +1,5 @@
 #pragma once
+
 #include "rodeo/input.h"
 
 typedef
@@ -77,3 +78,10 @@ register_inputs(void);
 
 void
 unregister_inputs(void);
+
+#define \
+register_inputs_do() \
+mrodeo_defer_do( \
+	register_inputs(), \
+	unregister_inputs() \
+)
