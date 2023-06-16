@@ -326,7 +326,6 @@ main(void)
 {
 	register_inputs_do()
 	{
-		
 		rodeo_log(
 			rodeo_logLevel_info,
 			"Testing logging... It seems to work!"
@@ -339,7 +338,7 @@ main(void)
 			rodeo_logLevel_error,
 			"Testing error log level... It seems to work!"
 		);
-		mrodeo_do(480, 640, cstr_lit("Rodeo Window"), 4)
+		mrodeo_do(640, 480, cstr_lit("Rodeo Window"), 4)
 		{
 			renderer = rodeo_gfx_renderer_name_get();
 			rodeo_gfx_frame_limit_set(60);
@@ -393,10 +392,7 @@ main(void)
 			rodeo_gfx_texture_2d_destroy(texture);
 			rodeo_collision_2d_collection_destroy(world_orc);
 			rodeo_collision_2d_collection_destroy(world_other);
-
 		}
-
 	}
-
 	return 0;
 }
