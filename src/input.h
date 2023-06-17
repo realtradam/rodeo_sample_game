@@ -11,6 +11,8 @@ struct
 	rodeo_input_command_t right;
 	rodeo_input_command_t up;
 	rodeo_input_command_t down;
+	rodeo_input_command_t mouse_x;
+	rodeo_input_command_t mouse_y;
 	rodeo_input_command_t play_sound;
 	rodeo_input_command_t play_sound2;
 	rodeo_input_command_t play_sound3;
@@ -69,6 +71,18 @@ play_sound_input2(
 
 void*
 play_sound_input3(
+	rodeo_input_any_state_t *input_state,
+	void *data
+);
+
+void* 
+mouse_x_input(
+	rodeo_input_any_state_t *input_state,
+	void *data
+);
+
+void* 
+mouse_y_input(
 	rodeo_input_any_state_t *input_state,
 	void *data
 );

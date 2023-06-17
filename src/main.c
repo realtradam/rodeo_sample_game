@@ -150,6 +150,7 @@ main_loop(void)
 				.width = rodeo_gfx_width_get(),
 				.height = rodeo_gfx_height_get()
 			},
+			0,
 			blue_clear
 		);
 		bool reset_movement = true;
@@ -187,39 +188,76 @@ main_loop(void)
 			summon_units();
 		}
 
-		rodeo_gfx_rectangle_draw(
-			(rodeo_rectangle_t){ 100, 100, 50, 50 },
-			red
+		rodeo_log(
+			rodeo_logLevel_warning,
+			"%f, %f",
+			(float)*(int64_t*)mouse_x_input(NULL,NULL) - (150.0f / 2.0f),
+			(float)*(int64_t*)mouse_y_input(NULL,NULL) - (150.0f / 2.0f)
 		);
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 100, 160, 50, 50 },
-	   		green
-	   );
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 160, 100, 50, 50 },
-	   		blue
-	   );
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 160, 160, 50, 50 },
-	   		pink
-	   );
 
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 300, 300, 50, 50 },
-	   		red_clear
-	   );
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 310, 310, 50, 50 },
-	   		green_clear
-	   );
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 320, 320, 50, 50 },
-	   		blue_clear
-	   );
-	   rodeo_gfx_rectangle_draw(  
-	   		(rodeo_rectangle_t){ 330, 330, 50, 50 },
-	   		pink_clear
-	   );
+
+		rodeo_rectangle_t scissor = {
+				.x = (float)*(int64_t*)mouse_x_input(NULL,NULL) - (150.0f / 2.0f),
+				.y = (float)*(int64_t*)mouse_y_input(NULL,NULL) - (150.0f / 2.0f),
+			.width = 150,
+			.height = 150
+		};
+
+		mrodeo_gfx_scissor_do(scissor)
+		{
+			rodeo_gfx_rectangle_draw(
+				(rodeo_rectangle_t){ 100, 100, 50, 50 },
+				0,
+				red
+			);
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 100, 160, 50, 50 },
+				0,
+	 	  		green
+	 	  );
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 160, 100, 50, 50 },
+				0,
+	 	  		blue
+	 	  );
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 160, 160, 50, 50 },
+				0,
+	 	  		pink
+	 	  );
+
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 300, 300, 50, 50 },
+				0,
+	 	  		red_clear
+	 	  );
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 310, 310, 50, 50 },
+				0,
+	 	  		green_clear
+	 	  );
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 320, 320, 50, 50 },
+				0,
+	 	  		blue_clear
+	 	  );
+	 	  rodeo_gfx_rectangle_draw(  
+	 	  		(rodeo_rectangle_t){ 330, 330, 50, 50 },
+				0,
+	 	  		pink_clear
+	 	  );
+		 }
+		if(scissor.x < 0)
+		{
+			scissor.width += scissor.x;
+			scissor.x = 0;
+		}
+		if(scissor.y < 0)
+		{
+			scissor.height += scissor.y;
+			scissor.y = 0;
+		}
+		rodeo_gfx_rectangle_draw(scissor, 0, pink_clear);
 
 
 	   for(uint64_t i = 0; i < (sizeof(box_collision_ids) / sizeof(box_collision_ids[0])); ++i)
@@ -229,6 +267,7 @@ main_loop(void)
 		   {
 		   rodeo_gfx_rectangle_draw(
 				(*box.data_handle)->rect,
+				0,
 				pink
 			);
 		   }
@@ -260,6 +299,7 @@ main_loop(void)
 					.width = 13,
 					.height = 19
 				},
+				0,
 				(rodeo_color_RGBAFloat_t){ .array = {1,1,1,1} },
 				texture
 				);
@@ -278,6 +318,25 @@ main_loop(void)
 				.width = 13,
 				.height = 19
 			},
+			0,
+			(rodeo_color_RGBAFloat_t){ .array = {1.0,1.0,1.0,1.0} },
+			texture
+		);
+
+	   rodeo_gfx_texture_2d_draw(
+			(rodeo_rectangle_t){
+				.x = (float)*(int64_t*)mouse_x_input(NULL,NULL) - (orc_size[1] / 2.0f),
+				.y = (float)*(int64_t*)mouse_y_input(NULL,NULL) - (orc_size[1] / 2.0f),
+				.width = orc_size[0],
+				.height = orc_size[1],
+			},
+			(rodeo_rectangle_t){
+				.x = 5,
+				.y = 5,
+				.width = 13,
+				.height = 19
+			},
+			(float)rodeo_gfx_frame_count_get() / 60.0f,
 			(rodeo_color_RGBAFloat_t){ .array = {1.0,1.0,1.0,1.0} },
 			texture
 		);
@@ -316,8 +375,8 @@ main_loop(void)
 	   rodeo_rectangle_t letter_first = rodeo_gfx_letterbox_first_get();
 	   rodeo_rectangle_t letter_second = rodeo_gfx_letterbox_second_get();
 
-	   rodeo_gfx_rectangle_draw(letter_first, black_clear);
-	   rodeo_gfx_rectangle_draw(letter_second, black_clear);
+	   rodeo_gfx_rectangle_draw(letter_first, 0, black_clear);
+	   rodeo_gfx_rectangle_draw(letter_second, 0, black_clear);
 	}
 }
 
