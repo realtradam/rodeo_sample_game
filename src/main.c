@@ -300,6 +300,7 @@ main_loop(void)
 					.height = 19
 				},
 				0,
+				(rodeo_math_vec2_t){0},
 				(rodeo_color_RGBAFloat_t){ .array = {1,1,1,1} },
 				texture
 				);
@@ -319,14 +320,15 @@ main_loop(void)
 				.height = 19
 			},
 			0,
+			(rodeo_math_vec2_t){0},
 			(rodeo_color_RGBAFloat_t){ .array = {1.0,1.0,1.0,1.0} },
 			texture
 		);
 
 	   rodeo_gfx_texture_2d_draw(
 			(rodeo_rectangle_t){
-				.x = (float)*(int64_t*)mouse_x_input(NULL,NULL) - (orc_size[1] / 2.0f),
-				.y = (float)*(int64_t*)mouse_y_input(NULL,NULL) - (orc_size[1] / 2.0f),
+				.x = (float)*(int64_t*)mouse_x_input(NULL,NULL),
+				.y = (float)*(int64_t*)mouse_y_input(NULL,NULL),
 				.width = orc_size[0],
 				.height = orc_size[1],
 			},
@@ -337,6 +339,7 @@ main_loop(void)
 				.height = 19
 			},
 			(float)rodeo_gfx_frame_count_get() / 60.0f,
+			(rodeo_math_vec2_t){ .val = { .x = orc_size[0]/2.0f, .y = orc_size[1]/2.0f } },
 			(rodeo_color_RGBAFloat_t){ .array = {1.0,1.0,1.0,1.0} },
 			texture
 		);
