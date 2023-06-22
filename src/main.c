@@ -186,15 +186,20 @@ main_loop(void)
 		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
 			summon_units();
+			rodeo_gfx_matrix_push();
+			rodeo_gfx_matrix_set(
+				rodeo_math_mat4_translate(
+					rodeo_gfx_matrix_get(),
+					(rodeo_math_vec3_t){ .raw = { 1, 1, 0 } }
+				)
+			);
+			rodeo_log(
+				rodeo_logLevel_info,
+				"%i / %i",
+				rodeo_gfx_matrix_size(),
+				rodeo_gfx_matrix_capacity()
+			);
 		}
-
-		rodeo_log(
-			rodeo_logLevel_warning,
-			"%f, %f",
-			(float)*(int64_t*)mouse_x_input(NULL,NULL) - (150.0f / 2.0f),
-			(float)*(int64_t*)mouse_y_input(NULL,NULL) - (150.0f / 2.0f)
-		);
-
 
 		rodeo_rectangle_t scissor = {
 				.x = (float)*(int64_t*)mouse_x_input(NULL,NULL) - (150.0f / 2.0f),
@@ -309,7 +314,7 @@ main_loop(void)
 	   rodeo_gfx_texture_2d_draw(
 			(rodeo_rectangle_t){
 				.x = (float)(int32_t)summon_position.x - (orc_size[0] / 2.0f),
-				.y = (float)(int32_t)summon_position.y - (orc_size[1] / 2.0f) ,
+				.y = (float)(int32_t)summon_position.y - (orc_size[1] / 2.0f),
 				.width = orc_size[0],
 				.height = orc_size[1],
 			},
