@@ -9,6 +9,15 @@ float time_var;
 rodeo_audio_sound_t scratch = {0};
 rodeo_audio_music_t music = {0};
 
+rodeo_gfx_camera_2d_t camera = {
+	.target = (rodeo_math_vec2_t){ .val.x = -640.0f/2, .val.y = -480.0f/2 },
+	//.target = (rodeo_math_vec2_t){ .val.x = 0, .val.y = 0 },
+	.turns = 0.0f,
+	.zoom = 1.0f,
+	//.offset = (rodeo_math_vec2_t){ .val.x = 0, .val.y = 0 }
+	.offset = (rodeo_math_vec2_t){ .val.x = -640.0f/2, .val.y = -480.0f/2 }
+};
+
 typedef
 struct
 {
@@ -186,6 +195,8 @@ main_loop(void)
 		if(*(bool*)summon_units_input(NULL, NULL)) 
 		{
 			summon_units();
+			camera.turns += 0.05f;
+			/*
 			rodeo_gfx_matrix_push();
 			rodeo_gfx_matrix_set(
 				rodeo_math_mat4_translate(
@@ -193,12 +204,7 @@ main_loop(void)
 					(rodeo_math_vec3_t){ .raw = { 1, 1, 0 } }
 				)
 			);
-			rodeo_log(
-				rodeo_logLevel_info,
-				"%i / %i",
-				rodeo_gfx_matrix_size(),
-				rodeo_gfx_matrix_capacity()
-			);
+			*/
 		}
 
 		rodeo_rectangle_t scissor = {
@@ -208,7 +214,8 @@ main_loop(void)
 			.height = 150
 		};
 
-		mrodeo_gfx_scissor_do(scissor)
+		//mrodeo_gfx_scissor_do(scissor)
+		mrodeo_gfx_camera_do(camera)
 		{
 			rodeo_gfx_rectangle_draw(
 				(rodeo_rectangle_t){ 100, 100, 50, 50 },
