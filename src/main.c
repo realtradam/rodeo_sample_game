@@ -1,5 +1,6 @@
 
 #include "rodeo.h"
+#include "rodeo/rmlui.h"
 #include <inttypes.h>
 #include "input.h"
 
@@ -8,6 +9,8 @@ float time_var;
 
 rodeo_audio_sound_t scratch = {0};
 rodeo_audio_music_t music = {0};
+
+rodeo_rmlui_document_t rml_doc = {0};
 
 rodeo_gfx_camera_2d_t camera = {
 	.target = (rodeo_math_vec2_t){ .val.x = -640.0f/2, .val.y = -480.0f/2 },
@@ -387,6 +390,10 @@ main_loop(void)
 			num_of_units
 		);
 		*/
+
+	   rodeo_rmlui_update();
+	   rodeo_rmlui_render();
+
 	   rodeo_rectangle_t letter_first = rodeo_gfx_letterbox_first_get();
 	   rodeo_rectangle_t letter_second = rodeo_gfx_letterbox_second_get();
 
@@ -414,58 +421,65 @@ main(void)
 		);
 		mrodeo_do(640, 480, cstr_lit("Rodeo Window"), 4)
 		{
-			renderer = rodeo_gfx_renderer_name_get();
-			rodeo_gfx_frame_limit_set(60);
+			mrodeo_rmlui_do()
+			{
+				//rodeo_rmlui_font_load(cstr_lit("assets/DigitalDisco.ttf"));
+				rml_doc = rodeo_rmlui_document_load(cstr_lit("assets/demo.html"));
+				rodeo_rmlui_document_show(rml_doc);
 
-			//texture = rodeo_texture_2d_create_from_RGBA8(
-			//	2,
-			//	2,
-			//	texture_memory
-			//);
-			
-			world_orc = rodeo_collision_2d_collection_create(1);
-			world_other = rodeo_collision_2d_collection_create(2);
-
-			rodeo_collision_2d_item_data_t orc_collision_params = {
-				.rect = {
-					.x = summon_position.x,
-					.y = summon_position.y,
-					.width = orc_size[0],
-					.height = orc_size[1]
-				}
-			};
-			orc_collision_id = (*rodeo_collision_2d_item_create(world_orc, orc_collision_params).data_handle)->id;
-			
-			rodeo_collision_2d_item_data_t test_collision_params = {
-				.rect = {
-					.x = 320,
-					.y = 240,
-					.width = orc_size[0],
-					.height = orc_size[1]
-				}
-			};
-			box_collision_ids[0] = (*rodeo_collision_2d_item_create(world_orc, test_collision_params).data_handle)->id;
-			rodeo_collision_2d_item_data_t test2_collision_params = {
-				.rect = {
-					.x = 0,
-					.y = 240,
-					.width = orc_size[0],
-					.height = orc_size[1]
-				}
-			};
-			box_collision_ids[1] = (*rodeo_collision_2d_item_create(world_orc, test2_collision_params).data_handle)->id;
-
-			texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
-			//scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
-			//music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
-
-			rodeo_mainLoop_run(
-				main_loop
-			);
-
-			rodeo_gfx_texture_2d_destroy(texture);
-			rodeo_collision_2d_collection_destroy(world_orc);
-			rodeo_collision_2d_collection_destroy(world_other);
+				renderer = rodeo_gfx_renderer_name_get();
+				rodeo_gfx_frame_limit_set(60);
+	
+				//texture = rodeo_texture_2d_create_from_RGBA8(
+				//	2,
+				//	2,
+				//	texture_memory
+				//);
+				
+				world_orc = rodeo_collision_2d_collection_create(1);
+				world_other = rodeo_collision_2d_collection_create(2);
+	
+				rodeo_collision_2d_item_data_t orc_collision_params = {
+					.rect = {
+						.x = summon_position.x,
+						.y = summon_position.y,
+						.width = orc_size[0],
+						.height = orc_size[1]
+					}
+				};
+				orc_collision_id = (*rodeo_collision_2d_item_create(world_orc, orc_collision_params).data_handle)->id;
+				
+				rodeo_collision_2d_item_data_t test_collision_params = {
+					.rect = {
+						.x = 320,
+						.y = 240,
+						.width = orc_size[0],
+						.height = orc_size[1]
+					}
+				};
+				box_collision_ids[0] = (*rodeo_collision_2d_item_create(world_orc, test_collision_params).data_handle)->id;
+				rodeo_collision_2d_item_data_t test2_collision_params = {
+					.rect = {
+						.x = 0,
+						.y = 240,
+						.width = orc_size[0],
+						.height = orc_size[1]
+					}
+				};
+				box_collision_ids[1] = (*rodeo_collision_2d_item_create(world_orc, test2_collision_params).data_handle)->id;
+	
+				texture = rodeo_gfx_texture_2d_create_from_path(cstr_lit("assets/orc.png"));
+				//scratch = rodeo_audio_sound_create_from_path(cstr_lit("assets/sample.wav"));
+				//music = rodeo_audio_music_create_from_path(cstr_lit("assets/music.ogg"));
+	
+				rodeo_mainLoop_run(
+					main_loop
+				);
+	
+				rodeo_gfx_texture_2d_destroy(texture);
+				rodeo_collision_2d_collection_destroy(world_orc);
+				rodeo_collision_2d_collection_destroy(world_other);
+			}
 		}
 	}
 	return 0;
